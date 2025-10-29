@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String           @id @default(cuid())
+  name                   String
+  email                  String
+  customRole             Role             @default(PROJECT_MANAGER)
+  image                  String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  emailVerified          Boolean          @default(true)
+  // Relations
+  createdProjects        Project[]
+  assignedProjects       ProjectVersion[] @relation("ProjectVersionAssignedToProjectManager")
+  createdProjectVersions ProjectVersion[] @relation("ProjectVersionCreatedBy")
+  sessions               Session[]
+  accounts               Account[]
+
+  role       String?
+  banned     Boolean?
+  banReason  String?
+  banExpires DateTime?
+
+  apikeys Apikey[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+enum Role {
+  MANAGING_DIRECTOR
+  HEAD_OF_PLANNING
+  PROJECT_MANAGER
+}
+
+model Project {
+  id              Int              @id @default(autoincrement())
+  // project specific data
+  projectVersions ProjectVersion[]
+  createdById     String
+  createdBy       User             @relation(fields: [createdById], references: [id])
+  createdAt       DateTime         @default(now())
+}
+
+model ProjectVersion {
+  id                            Int           @id @default(autoincrement())
+  // project specific data
+  projectName                   String
+  projectType                   String
+  projectCategory               String
+  priorityLevel                 PriorityLevel
+  projectStatus                 ProjectStatus @default(ACTIVE)
+  projectDescription            String
+  estimatedBudget               Float
+  floorArea                     Float
+  msTeamsLink                   String
+  projectDocuments              Json[]
+  projectStartDate              DateTime
+  estimatedEndDate              DateTime
+  estimatedWorkingDays          Float
+  bufferDays                    Float
+  specialInstructions           String
+  yesterdayReportCreatedAt      DateTime?
+  // automatic fields
+  projectVersionCreatedAt       DateTime      @default(now())
+  // postgresql JSON objects
+  siteLocation                  Json
+  client                        Json
+  sheet1                        Json[]
+  comments                      Json[]
+  // relations
+  projectVersionCreatedByUserId String
+  projectVersionCreatedByUser   User          @relation("ProjectVersionCreatedBy", fields: [projectVersionCreatedByUserId], references: [id])
+  assignedProjectManagerId      String
+  assignedProjectManager        User          @relation("ProjectVersionAssignedToProjectManager", fields: [assignedProjectManagerId], references: [id])
+  yesterdayReportStatus         ReportStatus? @default(NOT_CREATED)
+  projectId                     Int
+  project                       Project       @relation(fields: [projectId], references: [id])
+}
+
+enum ReportStatus {
+  NOT_CREATED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PriorityLevel {
+  HIGH_PRIORITY
+  MEDIUM_PRIORITY
+  LOW_PRIORITY
+  URGENT
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  DELAYED
+  COMPLETED
+  BLOCKED
+  CANCELLED
+}
+
+// status: "Active" | "On Hold" | "Delayed" | "Completed";
+
+// model DailyReport {
+//   id        String        @id @default(cuid())
+//   project   Project       @relation(fields: [projectId], references: [id])
+//   projectId String
+//   manager   User          @relation(fields: [managerId], references: [id])
+//   managerId String
+//   date      DateTime
+//   entries   ReportEntry[]
+//   blockages Blockage[]
+//   status    ReportStatus  @default(PENDING)
+//   pdfUrl    String?
+//   createdAt DateTime      @default(now())
+// }
+
+// model ReportEntry {
+//   id                 String      @id @default(cuid())
+//   dailyReport        DailyReport @relation(fields: [dailyReportId], references: [id])
+//   dailyReportId      String
+//   projectItem        ProjectItem @relation(fields: [projectItemId], references: [id])
+//   projectItemId      String
+//   yesterdaySupplied  Int
+//   yesterdayInstalled Int
+//   photos             Photo[]
+// }
+
+// model Photo {
+//   id            String      @id @default(cuid())
+//   reportEntry   ReportEntry @relation(fields: [reportEntryId], references: [id])
+//   reportEntryId String
+//   url           String
+//   location      String
+//   description   String
+//   orientation   Orientation
+//   openingDate   DateTime
+//   closeDate     DateTime?
+// }
+
+// model Blockage {
+//   id            String       @id @default(cuid())
+//   dailyReport   DailyReport  @relation(fields: [dailyReportId], references: [id])
+//   dailyReportId String
+//   type          BlockageType
+//   description   String
+//   photoUrl      String?
+//   location      String
+//   issueDetails  String
+//   createdAt     DateTime     @default(now())
+//   resolved      Boolean      @default(false)
+//   resolvedAt    DateTime?
+// }
+
+// enum Orientation {
+//   NORTH
+//   SOUTH
+//   EAST
+//   WEST
+// }
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model Apikey {
+  id                  String    @id
+  name                String?
+  start               String?
+  prefix              String?
+  key                 String
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime?
+  enabled             Boolean?
+  rateLimitEnabled    Boolean?
+  rateLimitTimeWindow Int?
+  rateLimitMax        Int?
+  requestCount        Int?
+  remaining           Int?
+  lastRequest         DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime
+  updatedAt           DateTime
+  permissions         String?
+  metadata            String?
+
+  @@map("apikey")
+}

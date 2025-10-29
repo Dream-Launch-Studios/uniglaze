@@ -1,0 +1,328 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Font families from external config */
+  --font-family-sans: "Inter", "system-ui", "sans-serif";
+  --font-family-mono: "JetBrains Mono", "monospace";
+
+  /* Container configuration from external config */
+  --container-center: true;
+  --container-padding: 2rem;
+  --container-screens-2xl: 1400px;
+
+  /* Font sizes with line heights from external config */
+  --font-size-xs: 0.75rem;
+  --font-size-xs--line-height: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-sm--line-height: 1.25rem;
+  --font-size-base: 1rem;
+  --font-size-base--line-height: 1.5rem;
+  --font-size-lg: 1.125rem;
+  --font-size-lg--line-height: 1.75rem;
+  --font-size-xl: 1.25rem;
+  --font-size-xl--line-height: 1.75rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-2xl--line-height: 2rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-3xl--line-height: 2.25rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-4xl--line-height: 2.5rem;
+
+  /* Custom spacing from external config */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-240: 60rem;
+
+  /* Z-index values from external config */
+  --z-index-100: 100;
+  --z-index-200: 200;
+  --z-index-300: 300;
+  --z-index-400: 400;
+
+  /* Border radius from external config */
+  --radius: 0.625rem;
+  --border-radius-sm: calc(var(--radius) - 4px);
+  --border-radius-md: calc(var(--radius) - 2px);
+  --border-radius-lg: var(--radius);
+  --border-radius-xl: calc(var(--radius) + 4px);
+
+  /* Core Colors from external tailwind.css - overriding existing */
+  --color-background: #ffffff;
+  --color-foreground: #1f2937;
+  --color-border: #e5e7eb;
+  --color-input: #ffffff;
+  --color-ring: #3b82f6;
+
+  /* Card Colors from external */
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2937;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1f2937;
+
+  /* Muted Colors from external */
+  --color-muted: #f9fafb;
+  --color-muted-foreground: #6b7280;
+
+  /* Primary Colors from external */
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary Colors from external */
+  --color-secondary: #6b7280;
+  --color-secondary-foreground: #ffffff;
+
+  /* Accent Colors from external */
+  --color-accent: #f59e0b;
+  --color-accent-foreground: #ffffff;
+
+  /* Status Colors from external tailwind.css */
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+  --color-error: #ef4444;
+  --color-error-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  /* Surface Colors from external */
+  --color-surface: #ffffff;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+
+  /* Construction Orange - From existing */
+  --color-accent-hover: hsl(25, 95%, 45%);
+
+  /* Glass Highlight - From existing */
+  --color-glass: hsl(195, 100%, 85%);
+  --color-glass-foreground: hsl(215, 25%, 15%);
+
+  /* Chart colors - From existing */
+  --color-chart-1: oklch(0.646 0.222 41.116);
+  --color-chart-2: oklch(0.6 0.118 184.704);
+  --color-chart-3: oklch(0.398 0.07 227.392);
+  --color-chart-4: oklch(0.828 0.189 84.429);
+  --color-chart-5: oklch(0.769 0.188 70.08);
+
+  /* Sidebar colors - From existing */
+  --color-sidebar: oklch(0.985 0 0);
+  --color-sidebar-foreground: oklch(0.145 0 0);
+  --color-sidebar-primary: oklch(0.205 0 0);
+  --color-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-sidebar-accent: oklch(0.97 0 0);
+  --color-sidebar-accent-foreground: oklch(0.205 0 0);
+  --color-sidebar-border: oklch(0.922 0 0);
+  --color-sidebar-ring: oklch(0.708 0 0);
+  --color-sidebar-background: hsl(0, 0%, 98%);
+
+  /* Animations from external tailwind.config.js */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-slide-in-from-left: slide-in-from-left 0.3s ease-out;
+  --animate-slide-out-to-left: slide-out-to-left 0.3s ease-out;
+}
+
+/* Base styles from external tailwind.css */
+* {
+  border-color: theme(colors.border);
+}
+
+body {
+  background-color: theme(colors.background);
+  color: theme(colors.foreground);
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Inter", "system-ui", "sans-serif";
+}
+
+/* Utility classes from external tailwind.css */
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.elevation-1 {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.elevation-2 {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.elevation-3 {
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.elevation-4 {
+  box-shadow:
+    0 10px 15px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.transition-smooth {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-complex {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px theme(colors.ring);
+}
+
+.card {
+  background-color: theme(colors.background);
+  border: 1px solid theme(colors.border);
+  border-radius: theme(borderRadius.lg);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 2em;
+}
+
+.card-hover {
+  background-color: theme(colors.background);
+  border: 1px solid theme(colors.border);
+  border-radius: theme(borderRadius.lg);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.btn-clean {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: theme(borderRadius.md);
+  font-size: theme(fontSize.sm);
+  font-weight: theme(fontWeight.medium);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.btn-clean:focus {
+  box-shadow: 0 0 0 2px theme(colors.ring);
+}
+
+.btn-clean:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Keyframes from external tailwind.config.js and existing */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-to-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Existing styles from original globals.css */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+[data-sonner-toast] {
+  background: white !important;
+  border: 1px solid #ccc !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
