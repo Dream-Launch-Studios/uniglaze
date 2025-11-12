@@ -83,6 +83,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
 
   const { data: session } = useSession() as {
     data: Session | null;
@@ -91,42 +92,91 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
 
   const project = useProjectStore.getState().getProject();
 
-  const handleExportPDF = async (): Promise<void> => {
-    if (!report) return;
+  const ensureProjectContext = (): void => {
+    if (!project?.latestProjectVersion) {
+      throw new Error("No project context available for PDF generation");
+    }
+  };
 
+  const generatePDFBlobs = async (): Promise<{
+    teamBlob: Blob;
+    clientBlob: Blob;
+  }> => {
+    if (!report) {
+      throw new Error("Missing report data");
+    }
+    ensureProjectContext();
+
+    const reportWithProject = {
+      ...report,
+      project,
+    };
+
+    const [teamBlob, clientBlob] = await Promise.all([
+      pdf(<ReportTeamPDF report={reportWithProject} />).toBlob(),
+      pdf(<ReportClientPDF report={reportWithProject} />).toBlob(),
+    ]);
+
+    return { teamBlob, clientBlob };
+  };
+
+  const triggerDownload = (blob: Blob, filename: string): void => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPDF = async (): Promise<void> => {
     try {
-      const reportWithProject = {
-        ...report,
-        project,
-      };
-      const teamBlob = await pdf(
-        <ReportTeamPDF report={reportWithProject} />,
-      ).toBlob();
-      const clientBlob = await pdf(
-        <ReportClientPDF report={reportWithProject} />,
-      ).toBlob();
+      setIsDownloading(true);
+      const { teamBlob, clientBlob } = await generatePDFBlobs();
+      const projectName =
+        project?.latestProjectVersion?.projectName ?? "daily-report";
+
+      triggerDownload(teamBlob, `${projectName}-team-report.pdf`);
+      triggerDownload(clientBlob, `${projectName}-client-report.pdf`);
+
+      toast.success("PDFs downloaded");
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      toast.error("Failed to download PDFs. Try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleSendPDF = async (): Promise<void> => {
+    try {
+      const { teamBlob, clientBlob } = await generatePDFBlobs();
+      const projectName =
+        project?.latestProjectVersion?.projectName ?? "daily-report";
 
       const teamAttachments = [
         {
-          filename: `${project.latestProjectVersion?.projectName}-team-report.pdf`,
-          content: teamBlob, // Blob is fine, server action will convert it
+          filename: `${projectName}-team-report.pdf`,
+          content: teamBlob,
         },
       ];
 
       const clientAttachments = [
         {
-          filename: `${project.latestProjectVersion?.projectName}-client-report.pdf`,
-          content: clientBlob, // Blob is fine, server action will convert it
+          filename: `${projectName}-client-report.pdf`,
+          content: clientBlob,
         },
       ];
 
       await sendEmail({
-        to: project.latestProjectVersion?.client?.clientEmail ?? "",
+        to: project?.latestProjectVersion?.client?.clientEmail ?? "",
         cc:
-          project.latestProjectVersion?.client?.clientCCEmails
+          project?.latestProjectVersion?.client?.clientCCEmails
             ?.split(",")
             .map((email) => email.trim()) ?? [],
-        subject: `Progress Report | ${project.latestProjectVersion?.projectName} | ${new Date().toLocaleDateString(
+        subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString(
           "en-IN",
           { day: "2-digit", month: "2-digit", year: "numeric" },
         )}`,
@@ -135,12 +185,12 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       });
 
       await sendEmail({
-        to: project.latestProjectVersion?.client?.internalEmail ?? "",
+        to: project?.latestProjectVersion?.client?.internalEmail ?? "",
         cc:
-          project.latestProjectVersion?.client?.internalCCEmails
+          project?.latestProjectVersion?.client?.internalCCEmails
             ?.split(",")
             .map((email) => email.trim()) ?? [],
-        subject: `Progress Report | ${project.latestProjectVersion?.projectName} | ${new Date().toLocaleDateString(
+        subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString(
           "en-IN",
           { day: "2-digit", month: "2-digit", year: "numeric" },
         )}`,
@@ -149,19 +199,9 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       });
 
       toast.success("PDF generated and sent to client and team successfully");
-
-      // Create download link
-      // const url = URL.createObjectURL(blob);
-      // const link = document.createElement("a");
-      // link.href = url;
-      // link.download = `${report.projectName}-report.pdf`;
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
-      // URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF generation failed:", error);
-      alert("PDF generation failed. Please try again.");
+      toast.error("PDF generation failed. Please try again.");
     }
   };
 
@@ -180,7 +220,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
     try {
       switch (action) {
         case "approve":
-          await handleExportPDF();
+          await handleSendPDF();
           await onApprove(report?.id?.toString() ?? "", comment);
           toast.success("Report approved successfully");
           break;
@@ -322,6 +362,18 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
 
           {/* Action Buttons */}
           <div className="space-y-3">
+            <Button
+              variant="outline"
+              fullWidth
+              iconName="Download"
+              iconPosition="left"
+              loading={isDownloading}
+              disabled={isSubmitting || isDownloading}
+              onClick={() => void handleDownloadPDF()}
+              className="border-primary text-primary hover:bg-primary/10"
+            >
+              Download PDFs
+            </Button>
             <Button
               variant="default"
               fullWidth
