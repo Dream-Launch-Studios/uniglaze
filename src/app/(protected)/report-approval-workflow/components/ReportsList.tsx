@@ -33,13 +33,17 @@ const ReportsList: React.FC<ReportsListProps> = ({
   onSelectReport,
 }) => {
   const formatDate = (date: string | Date): string => {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return "Invalid date";
+    }
     return new Intl.DateTimeFormat("en-IN", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(new Date(date));
+    }).format(dateObj);
   };
 
   const getPriorityColor = (priority: string): string => {
