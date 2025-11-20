@@ -14,11 +14,7 @@ export interface EmailProps {
 }
 
 const DailyProgressEmail: React.FC<EmailProps> = ({ toClient, clientName }) => {
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const currentDate = new Date().toLocaleDateString();
 
   return (
     <Html>

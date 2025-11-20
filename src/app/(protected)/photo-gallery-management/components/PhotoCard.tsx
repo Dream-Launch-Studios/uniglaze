@@ -46,13 +46,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
   showActions = true,
 }) => {
   const formatDate = (date: Date | string): string => {
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return new Date(date).toLocaleString();
   };
 
   // const getStatusColor = (status: Photo["status"]): string => {

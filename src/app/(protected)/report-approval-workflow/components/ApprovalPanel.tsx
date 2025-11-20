@@ -176,10 +176,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
           project?.latestProjectVersion?.client?.clientCCEmails
             ?.split(",")
             .map((email) => email.trim()) ?? [],
-        subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString(
-          "en-IN",
-          { day: "2-digit", month: "2-digit", year: "numeric" },
-        )}`,
+        subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString()}`,
         emailProps: { toClient: true, clientName: "Vali" },
         attachments: clientAttachments,
       });
@@ -190,10 +187,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
           project?.latestProjectVersion?.client?.internalCCEmails
             ?.split(",")
             .map((email) => email.trim()) ?? [],
-        subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString(
-          "en-IN",
-          { day: "2-digit", month: "2-digit", year: "numeric" },
-        )}`,
+        subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString()}`,
         emailProps: { toClient: false },
         attachments: teamAttachments,
       });
@@ -243,13 +237,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
   };
 
   const formatDate = (date: string): string => {
-    return new Intl.DateTimeFormat("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(date));
+    return new Date(date).toLocaleString();
   };
 
   if (!report) {

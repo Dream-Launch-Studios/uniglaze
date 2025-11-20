@@ -99,21 +99,11 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({
   };
 
   const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    return new Date(dateString).toLocaleDateString();
   };
 
   const formatDateTime = (dateString: string): string => {
-    return new Date(dateString).toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return new Date(dateString).toLocaleString();
   };
 
   const renderOverview = () => (

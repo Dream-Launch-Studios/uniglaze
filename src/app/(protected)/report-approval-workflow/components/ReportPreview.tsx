@@ -147,13 +147,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
   }
 
   const formatDate = (date: string | Date): string => {
-    return new Intl.DateTimeFormat("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(date));
+    return new Date(date).toLocaleString();
   };
 
   return (

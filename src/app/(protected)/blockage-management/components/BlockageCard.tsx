@@ -86,11 +86,7 @@ const BlockageCard: React.FC<BlockageCardProps> = ({
   };
 
   const formatDate = (date: string): string => {
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return new Date(date).toLocaleDateString();
   };
 
   const getDaysOutstanding = (createdDate: string): number => {

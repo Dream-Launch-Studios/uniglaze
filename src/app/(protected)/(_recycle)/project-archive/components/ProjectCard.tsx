@@ -67,11 +67,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    return new Date(dateString).toLocaleDateString();
   };
 
   const calculateDuration = (startDate: string, endDate: string): string => {

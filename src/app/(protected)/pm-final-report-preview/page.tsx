@@ -33,13 +33,7 @@ const ReportPreview = () => {
     if (!date) return "N/A";
     const parsedDate = new Date(date);
     if (isNaN(parsedDate.getTime())) return "N/A";
-    return new Intl.DateTimeFormat("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(parsedDate);
+    return parsedDate.toLocaleString();
   };
 
   const { data: session, isPending } = useSession() as {

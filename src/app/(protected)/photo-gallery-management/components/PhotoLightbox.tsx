@@ -97,14 +97,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
   if (!isOpen || !currentPhoto) return null;
 
   const formatDate = (date: Date | string): string => {
-    return new Date(date).toLocaleDateString("en-IN", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return new Date(date).toLocaleString();
   };
 
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.25, 3));

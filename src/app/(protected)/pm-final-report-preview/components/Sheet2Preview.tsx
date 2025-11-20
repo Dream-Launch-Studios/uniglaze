@@ -104,13 +104,7 @@ const Sheet2Preview: React.FC<Sheet2PreviewProps> = ({ workflowData }) => {
         <div className="mt-4 flex justify-center">
           <div className="bg-primary/10 rounded-lg px-4 py-2">
             <p className="text-primary text-sm font-medium">
-              Report Date:{" "}
-              {new Date().toLocaleDateString("en-IN", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              Report Date: {new Date().toLocaleDateString()}
             </p>
           </div>
         </div>

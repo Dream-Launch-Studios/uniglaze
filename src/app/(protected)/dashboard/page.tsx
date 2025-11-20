@@ -771,20 +771,11 @@ const Dashboard: React.FC = () => {
   const mockNotifications = getMockNotifications();
 
   const formatTime = (date: Date): string => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return date.toLocaleTimeString();
   };
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return date.toLocaleDateString();
   };
 
   return (
