@@ -10,7 +10,7 @@ import ReportsList from "./components/ReportsList";
 import ReportPreview from "./components/ReportPreview";
 import ApprovalPanel from "./components/ApprovalPanel";
 import { api } from "@/trpc/react";
-import { type PriorityLevel, ReportStatus, Role } from "@prisma/client";
+import { PriorityLevel, ReportStatus, Role } from "@prisma/client";
 import {
   projectVersionSchema,
   type BlockageType,
@@ -81,7 +81,7 @@ const safeToLocaleString = (date: any): string => {
   return parsedDate.toLocaleString();
 };
 
-const ReportApprovalWorkflow: React.FC = () => {
+const ReportApprovalWorkflowContent: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<WorkflowReport | null>(
     null,
   );
@@ -316,93 +316,106 @@ const ReportApprovalWorkflow: React.FC = () => {
       setLoading(true);
       try {
         // Simulate network delay
+        if (!projects?.data || projects.data.length === 0) {
+          setReports([]);
+          setLoading(false);
+          return;
+        }
+
         const mockReports: WorkflowReport[] =
-          projects?.data?.map((project) => {
-            return {
-              id: project.latestProjectVersion.projectId!,
-              projectName: project.latestProjectVersion.projectName,
-              submittedBy: project.assignedProjectManager?.name ?? "",
-              submittedAt: safeToLocaleString(
-                project.latestProjectVersion?.yesterdayReportCreatedAt,
-              ),
-              yesterdayReportStatus: project.latestProjectVersion
-                .yesterdayReportStatus as unknown as ReportStatus,
-              priority: project.latestProjectVersion
-                .priorityLevel as unknown as PriorityLevel,
+          projects.data
+            .filter((project) => 
+              project.latestProjectVersion?.projectId && 
+              project.latestProjectVersion
+            )
+            .map((project) => {
+              const latestVersion = project.latestProjectVersion!;
+              
+              return {
+                id: latestVersion.projectId ?? 0,
+                projectName: latestVersion.projectName ?? "",
+                submittedBy: project.assignedProjectManager?.name ?? "",
+                submittedAt: safeToLocaleString(
+                  latestVersion?.yesterdayReportCreatedAt,
+                ),
+                yesterdayReportStatus: (latestVersion
+                  .yesterdayReportStatus as unknown as ReportStatus) ?? ReportStatus.PENDING,
+                priority: (latestVersion
+                  .priorityLevel as unknown as PriorityLevel) ?? PriorityLevel.LOW_PRIORITY,
               overallProgress: Array.isArray(
-                project?.latestProjectVersion?.sheet1,
+                latestVersion?.sheet1,
               )
                 ? +(
-                    project?.latestProjectVersion?.sheet1?.reduce(
+                    latestVersion.sheet1.reduce(
                       (acc, item) => acc + (item?.percentInstalled || 0),
                       0,
-                    ) / (project?.latestProjectVersion?.sheet1?.length ?? 1)
+                    ) / (latestVersion.sheet1.length || 1)
                   ).toFixed(2)
                 : 0,
               completedItems:
-                project?.latestProjectVersion?.sheet1?.filter(
+                latestVersion?.sheet1?.filter(
                   (item) => item?.totalQuantity === item?.totalInstalled,
                 ).length ?? 0,
-              totalItems: project?.latestProjectVersion?.sheet1?.length ?? 0,
+              totalItems: latestVersion?.sheet1?.length ?? 0,
               photosCount:
-                project?.latestProjectVersion?.sheet1?.reduce(
+                latestVersion?.sheet1?.reduce(
                   (acc, item) =>
                     acc + (item?.yesterdayProgressPhotos?.length ?? 0),
                   0,
                 ) ?? 0,
               hasPhotos:
-                (project?.latestProjectVersion?.sheet1?.reduce(
+                (latestVersion?.sheet1?.reduce(
                   (acc, item) =>
                     acc + (item?.yesterdayProgressPhotos?.length ?? 0),
                   0,
                 ) ?? 0) > 0,
               hasComments:
-                Array.isArray(project?.latestProjectVersion?.comments) &&
-                project?.latestProjectVersion?.comments?.length > 0,
+                Array.isArray(latestVersion?.comments) &&
+                latestVersion.comments.length > 0,
               hasChanges:
-                Array.isArray(project?.latestProjectVersion?.comments) &&
-                project?.latestProjectVersion?.comments?.length > 0,
+                Array.isArray(latestVersion?.comments) &&
+                latestVersion.comments.length > 0,
               lastComment: Array.isArray(
-                project?.latestProjectVersion?.comments,
+                latestVersion?.comments,
               )
-                ? project?.latestProjectVersion?.comments[
-                    project?.latestProjectVersion?.comments?.length - 1
-                  ]?.comment
+                ? latestVersion.comments[
+                    latestVersion.comments.length - 1
+                  ]?.comment ?? ""
                 : "",
               progressDetails:
-                project?.latestProjectVersion?.sheet1?.map((item) => ({
-                  itemName: item?.itemName,
-                  yetToSupply: item?.yetToSupply,
-                  yetToInstall: item?.yetToInstall,
-                  completed: item?.totalInstalled,
-                  progress: item?.percentInstalled,
-                  notes: item?.itemName,
+                latestVersion?.sheet1?.map((item) => ({
+                  itemName: item?.itemName ?? "",
+                  yetToSupply: item?.yetToSupply ?? 0,
+                  yetToInstall: item?.yetToInstall ?? 0,
+                  completed: item?.totalInstalled ?? 0,
+                  progress: item?.percentInstalled ?? 0,
+                  notes: item?.itemName ?? "",
                 })) ?? [],
-              photos: (project.latestProjectVersion.sheet1?.flatMap((item) =>
+              photos: (latestVersion.sheet1?.flatMap((item) =>
                 item?.yesterdayProgressPhotos?.map((photo) => ({
-                  url: photo?.photos[0]?.url,
-                  description: photo?.description,
-                })),
+                  url: photo?.photos?.[0]?.url ?? "",
+                  description: photo?.description ?? "",
+                })) ?? [],
               ) ?? []) as Photo[],
               blockages:
-                project.latestProjectVersion.sheet1?.flatMap((item) =>
+                latestVersion.sheet1?.flatMap((item) =>
                   (item?.blockages ?? [])?.map((blockage) => ({
-                    title: blockage?.category,
-                    description: blockage?.description,
-                    type: blockage?.type,
+                    title: blockage?.category ?? "",
+                    description: blockage?.description ?? "",
+                    type: blockage?.type ?? "CLIENT" as BlockageType,
                     reportedAt: safeToLocaleString(blockage?.blockageStartTime),
-                  })),
+                  })) ?? [],
                 ) ?? [],
               comments:
-                project.latestProjectVersion.comments?.map((item) => ({
-                  content: item?.comment,
-                  author: item?.author,
-                  action: project.latestProjectVersion
-                    .yesterdayReportStatus as unknown as ReportStatus,
+                latestVersion.comments?.map((item) => ({
+                  content: item?.comment ?? "",
+                  author: item?.author ?? "",
+                  action: (latestVersion
+                    .yesterdayReportStatus as unknown as ReportStatus) ?? ReportStatus.PENDING,
                   createdAt: safeToLocaleString(item?.createdAt),
                 })) ?? [],
             };
-          }) ?? [];
+            });
         // TODO: uncomment after UI chnages
         let filteredReports: WorkflowReport[] = [];
         if (session?.user?.customRole === Role.PROJECT_MANAGER) {
@@ -435,7 +448,9 @@ const ReportApprovalWorkflow: React.FC = () => {
       }
     };
 
-    void loadReports();
+    if (!isProjectsLoading && projects?.data) {
+      void loadReports();
+    }
   }, [isProjectsLoading, isPDF, projectId, projects?.data, session?.user?.customRole]);
 
   // const handleSelectReport = (report: WorkflowReport): void => {
@@ -724,8 +739,21 @@ const ReportApprovalWorkflow: React.FC = () => {
 
 export default function ReportApprovalWorkflowPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ReportApprovalWorkflow />
+    <Suspense fallback={
+      <div className="bg-background min-h-screen">
+        <Header />
+        <Sidebar />
+        <div className="pt-16 md:ml-60">
+          <div className="flex h-96 items-center justify-center">
+            <div className="text-center">
+              <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+              <p className="text-text-secondary">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ReportApprovalWorkflowContent />
     </Suspense>
   );
 }
