@@ -404,27 +404,26 @@ const ReportApprovalWorkflow: React.FC = () => {
             };
           }) ?? [];
         // TODO: uncomment after UI chnages
+        let filteredReports: WorkflowReport[] = [];
         if (session?.user?.customRole === Role.PROJECT_MANAGER) {
-          setReports([
-            ...mockReports.filter(
-              (item) => item?.yesterdayReportStatus === ReportStatus.REJECTED,
-            ),
-          ]);
+          filteredReports = mockReports.filter(
+            (item) => item?.yesterdayReportStatus === ReportStatus.REJECTED,
+          );
         } else {
-          setReports([
-            ...mockReports.filter(
-              (item) =>
-                item?.yesterdayReportStatus === ReportStatus.PENDING ||
-                item?.yesterdayReportStatus === ReportStatus.REJECTED,
-            ),
-          ]);
+          filteredReports = mockReports.filter(
+            (item) =>
+              item?.yesterdayReportStatus === ReportStatus.PENDING ||
+              item?.yesterdayReportStatus === ReportStatus.REJECTED,
+          );
         }
+        setReports(filteredReports);
+        
         if (projectId) {
-          const project = mockReports.find((r) => r.id === parseInt(projectId));
+          const project = filteredReports.find((r) => r.id === parseInt(projectId));
           if (project) setSelectedReport(project);
         } else {
           // Auto-select first pending report
-          const firstPending = reports.find(
+          const firstPending = filteredReports.find(
             (r) => r.yesterdayReportStatus === ReportStatus.PENDING,
           );
           if (firstPending) setSelectedReport(firstPending);
@@ -437,7 +436,7 @@ const ReportApprovalWorkflow: React.FC = () => {
     };
 
     void loadReports();
-  }, [isProjectsLoading, isPDF, projectId]);
+  }, [isProjectsLoading, isPDF, projectId, projects?.data, session?.user?.customRole]);
 
   // const handleSelectReport = (report: WorkflowReport): void => {
   //   setSelectedReport(report);
