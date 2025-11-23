@@ -132,11 +132,25 @@ export default function UsersPage() {
 
       <main className="pt-16 pb-20 md:ml-60 md:pb-8">
         <div className="w-full p-6">
-          <div className="flex w-full flex-wrap items-center justify-between">
-            <Breadcrumb className="mb-0" />
-            <OnboardingButton />
+          <Breadcrumb />
+          
+          {/* Page Header */}
+          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-text-primary mb-2 text-3xl font-bold tracking-tight">
+                Team Management
+              </h1>
+              <p className="text-text-secondary">
+                Manage team members, roles, and permissions
+              </p>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <OnboardingButton />
+            </div>
           </div>
-          <Table>
+
+          <div className="bg-card border-border rounded-lg border overflow-hidden">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Username</TableHead>
@@ -158,6 +172,7 @@ export default function UsersPage() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </div>
       </main>
     </div>

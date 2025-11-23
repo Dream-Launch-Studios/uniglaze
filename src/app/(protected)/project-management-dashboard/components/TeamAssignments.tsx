@@ -18,31 +18,11 @@ interface TeamAssignmentsProps {
 
 const TeamAssignments: React.FC<TeamAssignmentsProps> = ({ teamMembers }) => {
   const getRoleColor = (customRole: TeamMember["customRole"]): string => {
-    switch (customRole) {
-      case "Project Manager":
-        return "bg-primary/10 text-primary";
-      case "Site Engineer":
-        return "bg-success/10 text-success";
-      case "Supervisor":
-        return "bg-warning/10 text-warning";
-      case "Worker":
-        return "bg-muted text-text-secondary";
-      default:
-        return "bg-muted text-text-secondary";
-    }
+    return "bg-primary/5 text-primary";
   };
 
   const getStatusColor = (status: TeamMember["status"]): string => {
-    switch (status) {
-      case "Active":
-        return "bg-success";
-      case "Break":
-        return "bg-warning";
-      case "Offline":
-        return "bg-error";
-      default:
-        return "bg-muted";
-    }
+    return "bg-primary";
   };
 
   return (

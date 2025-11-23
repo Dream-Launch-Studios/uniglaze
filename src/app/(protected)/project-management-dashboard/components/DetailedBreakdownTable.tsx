@@ -93,18 +93,7 @@ const DetailedBreakdownTable: React.FC<DetailedBreakdownTableProps> = ({
   };
 
   const getStatusColor = (status: string): string => {
-    switch (status) {
-      case "completed":
-        return "bg-success/10 text-success border-success/20";
-      case "in-progress":
-        return "bg-warning/10 text-warning border-warning/20";
-      case "pending":
-        return "bg-muted text-text-secondary border-border";
-      case "blocked":
-        return "bg-error/10 text-error border-error/20";
-      default:
-        return "bg-muted text-text-secondary border-border";
-    }
+    return "bg-primary/5 text-primary border-primary/10";
   };
 
   // const getPriorityColor = (priority: string): string => {

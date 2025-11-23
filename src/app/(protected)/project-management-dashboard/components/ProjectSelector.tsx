@@ -86,15 +86,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
             <div className="grid grid-cols-1 gap-4 text-sm">
               <div>
                 <span className="text-text-secondary">Status:</span>
-                <span
-                  className={`ml-2 rounded-full px-2 py-1 text-xs font-medium ${
-                    currentProject.status === "Active"
-                      ? "bg-success/10 text-success"
-                      : currentProject.status === "On Hold"
-                        ? "bg-warning/10 text-warning"
-                        : "bg-muted text-text-secondary"
-                  }`}
-                >
+                <span className="bg-primary/5 text-primary ml-2 rounded-md px-2 py-1 text-xs font-medium">
                   {currentProject.status}
                 </span>
               </div>

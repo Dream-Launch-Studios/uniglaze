@@ -787,7 +787,7 @@ const ProjectManagementDashboard: React.FC = () => {
                 /> */}
 
                 {/* Tab Navigation */}
-                <div className="bg-surface border-border rounded-lg border">
+                <div className="bg-card border-border rounded-lg border">
                   <div className="border-border border-b">
                     <nav className="flex space-x-8 px-6">
                       <button

@@ -422,7 +422,7 @@ const ProjectCreation: React.FC = () => {
 
             <div className="mt-4 flex items-center space-x-3 md:mt-0">
               {isDraftSaved && (
-                <div className="text-success flex items-center space-x-2 text-sm">
+                <div className="text-primary flex items-center space-x-2 text-sm">
                   <Icon name="Check" size={16} />
                   <span>Draft saved</span>
                 </div>
@@ -459,7 +459,7 @@ const ProjectCreation: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="bg-surface border-border mt-8 flex flex-col items-center justify-between space-y-4 rounded-lg border p-4 md:flex-row md:space-y-0">
+              <div className="bg-card border-border mt-8 flex flex-col items-center justify-between space-y-4 rounded-lg border p-4 md:flex-row md:space-y-0">
                 {edit ? (
                   <div className="ml-auto flex items-center space-x-3">
                     <Button
