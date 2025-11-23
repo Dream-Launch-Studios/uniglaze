@@ -23,7 +23,7 @@ const DailyProgressEmail: React.FC<EmailProps> = ({ toClient, clientName }) => {
         <Container>
           <Section>
             {toClient ? (
-              <Text>Dear {clientName ?? "Valued Client"},</Text>
+              <Text>Dear Valued Client,</Text>
             ) : (
               <Text>Dear Team,</Text>
             )}
