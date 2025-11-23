@@ -45,7 +45,7 @@ export async function sendEmail({
     }
 
     return await resend.emails.send({
-      from: env.EMAIL_FROM,
+      from: "vamsi@uniglaze.in",
       to,
       cc: cc.length > 0 ? cc : undefined,
       subject,
