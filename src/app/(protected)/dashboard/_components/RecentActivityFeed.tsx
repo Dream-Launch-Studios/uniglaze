@@ -32,44 +32,11 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
   activities,
 }) => {
   const getActivityIcon = (type: ActivityType): ActivityIconConfig => {
-    switch (type) {
-      case "report_submitted":
-        return {
-          name: "FileText",
-          color: "var(--color-success)",
-          bg: "bg-success/10",
-        };
-      case "photo_uploaded":
-        return {
-          name: "Camera",
-          color: "var(--color-primary)",
-          bg: "bg-primary/10",
-        };
-      case "approval_pending":
-        return {
-          name: "Clock",
-          color: "var(--color-warning)",
-          bg: "bg-warning/10",
-        };
-      case "blockage_reported":
-        return {
-          name: "AlertTriangle",
-          color: "var(--color-error)",
-          bg: "bg-error/10",
-        };
-      case "project_created":
-        return {
-          name: "Plus",
-          color: "var(--color-accent)",
-          bg: "bg-accent/10",
-        };
-      default:
-        return {
-          name: "Circle",
-          color: "var(--color-text-secondary)",
-          bg: "bg-muted",
-        };
-    }
+    return {
+      name: type === "report_submitted" ? "FileText" : type === "photo_uploaded" ? "Camera" : type === "approval_pending" ? "Clock" : type === "blockage_reported" ? "AlertTriangle" : "Plus",
+      color: "var(--color-primary)",
+      bg: "bg-primary/5",
+    };
   };
 
   const formatTimeAgo = (timestamp: Date): string => {
@@ -99,14 +66,11 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
   };
 
   return (
-    <div className="card p-6">
+    <div className="bg-card border-border rounded-lg border p-6">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-text-primary text-lg font-semibold tracking-tight">
           Recent Activity
         </h3>
-        {/* <button className="text-primary hover:text-primary/80 transition-smooth text-sm font-medium">
-          View All
-        </button> */}
       </div>
 
       <div className="space-y-4">
@@ -129,7 +93,7 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
                   <h4 className="text-text-primary truncate text-sm font-semibold">
                     {activity.title}
                   </h4>
-                  <span className="text-text-secondary ml-2 flex-shrink-0 text-xs font-medium">
+                  <span className="text-text-secondary ml-2 flex-shrink-0 text-xs">
                     {formatTimeAgo(activity.timestamp)}
                   </span>
                 </div>
@@ -139,7 +103,7 @@ const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({
                 </p>
 
                 <div className="flex items-center space-x-2">
-                  <span className="text-primary bg-primary/10 rounded-full px-2 py-1 text-xs font-medium">
+                  <span className="bg-primary/5 text-primary rounded-md px-2 py-1 text-xs font-medium">
                     {activity.project}
                   </span>
                 </div>

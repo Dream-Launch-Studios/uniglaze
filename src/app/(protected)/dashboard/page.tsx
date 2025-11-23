@@ -794,10 +794,10 @@ const Dashboard: React.FC = () => {
                 <h1 className="text-text-primary mb-2 text-3xl font-bold tracking-tight">
                   Welcome back, {userName}!
                 </h1>
-                <p className="text-text-secondary font-medium">
+                <p className="text-text-secondary">
                   {formatDate(currentTime)} • {formatTime(currentTime)}
                   {userRole && (
-                    <span className="bg-primary/10 text-primary ml-3 rounded-full px-3 py-1 text-sm font-medium">
+                    <span className="bg-primary/5 text-primary ml-3 rounded-md px-3 py-1 text-sm font-medium">
                       {userRole === Role.MANAGING_DIRECTOR
                         ? "Managing Director"
                         : userRole === Role.HEAD_OF_PLANNING

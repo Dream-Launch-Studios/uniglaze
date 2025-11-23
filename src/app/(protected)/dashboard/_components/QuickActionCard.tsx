@@ -42,58 +42,24 @@ const QuickActionCard: React.FC<QuickActionCardProps> = ({ action }) => {
   const router = useRouter();
 
   const getTypeColor = (type: ActionType): string => {
-    switch (type) {
-      case "primary":
-        return "border-primary/20 bg-primary/5";
-      case "success":
-        return "border-success/20 bg-success/5";
-      case "warning":
-        return "border-warning/20 bg-warning/5";
-      case "accent":
-        return "border-accent/20 bg-accent/5";
-      default:
-        return "border-border bg-muted";
-    }
+    return "border-border bg-card";
   };
 
   const getTypeButtonVariant = (type: ActionType): ButtonVariant => {
-    switch (type) {
-      case "primary":
-        return "default";
-      case "success":
-        return "success";
-      case "warning":
-        return "warning";
-      case "accent":
-        return "outline";
-      default:
-        return "outline";
-    }
+    return "default";
   };
 
   return (
     <div
-      className={`card border-2 ${getTypeColor(action.type)} transition-smooth hover:elevation-2 p-6`}
+      className={`bg-card border-border transition-smooth hover:border-primary/30 rounded-lg border p-6`}
     >
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-              action.type === "primary"
-                ? "bg-primary/10"
-                : action.type === "success"
-                  ? "bg-success/10"
-                  : action.type === "warning"
-                    ? "bg-warning/10"
-                    : action.type === "accent"
-                      ? "bg-accent/10"
-                      : "bg-muted"
-            }`}
-          >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/5">
             <Icon
               name={action.icon}
               size={20}
-              color={`var(--color-${action.type === "accent" ? "accent" : action.type})`}
+              color="var(--color-primary)"
             />
           </div>
           <div className="flex-1">
@@ -107,10 +73,10 @@ const QuickActionCard: React.FC<QuickActionCardProps> = ({ action }) => {
         </div>
         {action.badge && (
           <div className="flex items-center space-x-1">
-            <span className="bg-accent text-accent-foreground rounded-full px-2 py-1 text-xs font-semibold shadow-sm">
+            <span className="bg-primary/10 text-primary rounded-md px-2 py-1 text-xs font-medium">
               {action.badge.count}
             </span>
-            <span className="text-text-secondary text-xs font-medium">
+            <span className="text-text-secondary text-xs">
               {action.badge.label}
             </span>
           </div>
@@ -126,17 +92,6 @@ const QuickActionCard: React.FC<QuickActionCardProps> = ({ action }) => {
         >
           {action.buttonText}
         </Button>
-
-        {/* <div className="flex items-center space-x-2">
-          <span className="text-text-secondary text-xs font-medium">
-            Quick access
-          </span>
-          <Icon
-            name="ArrowRight"
-            size={14}
-            color="var(--color-text-secondary)"
-          />
-        </div> */}
       </div>
     </div>
   );

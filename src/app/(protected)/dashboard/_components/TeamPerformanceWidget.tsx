@@ -26,20 +26,17 @@ const TeamPerformanceWidget: React.FC<TeamPerformanceWidgetProps> = ({
   teamMembers,
 }) => {
   const getPerformanceColor = (score: number): string => {
-    if (score >= 90) return "text-success";
-    if (score >= 75) return "text-primary";
-    if (score >= 60) return "text-warning";
-    return "text-error";
+    return "text-primary";
   };
 
   const getPerformanceBadge = (score: number): PerformanceBadge => {
     if (score >= 90)
-      return { label: "Excellent", color: "bg-success/10 text-success" };
+      return { label: "Excellent", color: "bg-primary/10 text-primary" };
     if (score >= 75)
       return { label: "Good", color: "bg-primary/10 text-primary" };
     if (score >= 60)
-      return { label: "Average", color: "bg-warning/10 text-warning" };
-    return { label: "Needs Improvement", color: "bg-error/10 text-error" };
+      return { label: "Average", color: "bg-primary/5 text-primary" };
+    return { label: "Needs Improvement", color: "bg-primary/5 text-primary" };
   };
 
   const sortedMembers = [...(teamMembers ?? [])]?.sort(
@@ -87,7 +84,7 @@ const TeamPerformanceWidget: React.FC<TeamPerformanceWidgetProps> = ({
                         />
                       </div>
                       {index < 3 && (
-                        <div className="bg-accent text-accent-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold">
+                        <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold">
                           {index + 1}
                         </div>
                       )}
@@ -119,15 +116,7 @@ const TeamPerformanceWidget: React.FC<TeamPerformanceWidgetProps> = ({
                       <div className="space-y-1">
                         <div className="bg-muted h-1.5 w-full rounded-full">
                           <div
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                              member.performanceScore >= 90
-                                ? "bg-success"
-                                : member.performanceScore >= 75
-                                  ? "bg-primary"
-                                  : member.performanceScore >= 60
-                                    ? "bg-warning"
-                                    : "bg-error"
-                            }`}
+                            className="bg-primary h-1.5 rounded-full transition-all duration-300"
                             style={{ width: `${member.performanceScore}%` }}
                           />
                         </div>

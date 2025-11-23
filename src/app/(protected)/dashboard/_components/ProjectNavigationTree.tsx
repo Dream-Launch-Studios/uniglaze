@@ -57,18 +57,7 @@ const ProjectNavigationTree: React.FC<ProjectNavigationTreeProps> = ({
   };
 
   const getStatusIcon = (status: Project["status"]): StatusIcon => {
-    switch (status) {
-      case ProjectStatus.ACTIVE:
-        return { name: "Play", color: "var(--color-success)" };
-      case ProjectStatus.ON_HOLD:
-        return { name: "Pause", color: "var(--color-warning)" };
-      case ProjectStatus.COMPLETED:
-        return { name: "CheckCircle", color: "var(--color-primary)" };
-      case ProjectStatus.DELAYED:
-        return { name: "AlertCircle", color: "var(--color-error)" };
-      default:
-        return { name: "Circle", color: "var(--color-text-secondary)" };
-    }
+    return { name: status === ProjectStatus.ACTIVE ? "Play" : status === ProjectStatus.ON_HOLD ? "Pause" : status === ProjectStatus.COMPLETED ? "CheckCircle" : "Circle", color: "var(--color-primary)" };
   };
 
   const projectActions: ProjectAction[] = [
@@ -107,7 +96,7 @@ const ProjectNavigationTree: React.FC<ProjectNavigationTreeProps> = ({
           className="mb-4"
         />
         <Button
-          variant="outline"
+          variant="default"
           size="sm"
           iconName="Plus"
           iconPosition="left"

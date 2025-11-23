@@ -33,37 +33,15 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
   const router = useRouter();
 
   const getStatusColor = (status: string): string => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return "text-success";
-      case "on hold":
-        return "text-warning";
-      case "delayed":
-        return "text-error";
-      case "completed":
-        return "text-primary";
-      default:
-        return "text-text-secondary";
-    }
+    return "text-text-secondary";
   };
 
   const getPriorityColor = (priority: string): string => {
-    switch (priority) {
-      case PriorityLevel.HIGH_PRIORITY:
-        return "bg-error/10 text-error border-error/20";
-      case PriorityLevel.MEDIUM_PRIORITY:
-        return "bg-warning/10 text-warning border-warning/20";
-      case PriorityLevel.LOW_PRIORITY:
-        return "bg-success/10 text-success border-success/20";
-      default:
-        return "bg-muted text-text-secondary border-border";
-    }
+    return "bg-primary/5 text-primary border-primary/10";
   };
 
   const getDaysRemainingColor = (days: number): string => {
-    if (days < 0) return "text-error";
-    if (days <= 7) return "text-warning";
-    return "text-success";
+    return "text-text-secondary";
   };
 
   const formatProgress = (progress: number): number => {
@@ -77,7 +55,7 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
 
   return (
     <div
-      className="card transition-smooth hover:elevation-2 p-6"
+      className="bg-card border-border transition-smooth hover:border-primary/30 rounded-lg border p-6 cursor-pointer"
       onClick={onClick}
     >
       {/* Header */}
@@ -86,18 +64,18 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
           <h3 className="text-text-primary mb-1 truncate text-lg font-semibold tracking-tight">
             {project.name}
           </h3>
-          <p className="text-text-secondary text-sm font-medium">
+          <p className="text-text-secondary text-sm">
             {project.client}
           </p>
         </div>
         <div className="ml-4 flex items-center space-x-2">
           <span
-            className={`rounded-full border px-2 py-1 text-xs font-semibold ${getPriorityColor(project.priority.toString())}`}
+            className={`rounded-md border px-2 py-1 text-xs font-medium ${getPriorityColor(project.priority.toString())}`}
           >
             {project.priority}
           </span>
           <span
-            className={`bg-muted text-text-secondary border-border rounded-full border px-2 py-1 text-xs font-semibold`}
+            className={`bg-muted text-text-secondary border-border rounded-md border px-2 py-1 text-xs font-medium`}
           >
             {project.status}
           </span>
@@ -107,7 +85,7 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="bg-primary space-x-2 text-sm font-medium text-white"
+              className="text-primary hover:bg-primary/5"
             >
               <Icon name="Edit" size={14} />
               <span className="text-sm font-medium">Edit</span>
@@ -119,10 +97,10 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
       {/* Progress Section */}
       <div className="mb-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-text-secondary text-sm font-medium">
+          <span className="text-text-secondary text-sm">
             Overall Progress
           </span>
-          <span className="text-text-primary text-lg font-bold">
+          <span className="text-text-primary text-lg font-semibold">
             {formatProgress(project.progress)}%
           </span>
         </div>
@@ -136,32 +114,32 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-text-secondary text-xs font-medium">
+              <span className="text-text-secondary text-xs">
                 Supply
               </span>
-              <span className="text-text-primary text-sm font-semibold">
+              <span className="text-text-primary text-sm font-medium">
                 {formatProgress(project.supplyProgress)}%
               </span>
             </div>
             <div className="bg-muted h-1.5 w-full rounded-full">
               <div
-                className="bg-success h-1.5 rounded-full transition-all duration-300"
+                className="bg-primary/60 h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${project.supplyProgress}%` }}
               />
             </div>
           </div>
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-text-secondary text-xs font-medium">
+              <span className="text-text-secondary text-xs">
                 Installation
               </span>
-              <span className="text-text-primary text-sm font-semibold">
+              <span className="text-text-primary text-sm font-medium">
                 {formatProgress(project.installationProgress)}%
               </span>
             </div>
             <div className="bg-muted h-1.5 w-full rounded-full">
               <div
-                className="bg-accent h-1.5 rounded-full transition-all duration-300"
+                className="bg-primary/80 h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${project.installationProgress}%` }}
               />
             </div>
@@ -172,7 +150,7 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
       {/* Footer */}
       <div className="border-border flex items-center justify-between border-t pt-4">
         <div className="flex items-center space-x-4 text-sm">
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1.5">
             <Icon
               name="Calendar"
               size={14}
@@ -180,29 +158,14 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
             />
             <span className="text-text-secondary">Due: {project.dueDate}</span>
           </div>
-          {/* <div className="flex items-center space-x-1">
-            <Icon name="Users" size={14} color="var(--color-text-secondary)" />
-            <span className="text-text-secondary">
-              {project.teamSize} members
-            </span>
-          </div> */}
         </div>
 
         <div className="flex items-center space-x-2">
-          <span
-            className={`text-xs font-semibold ${getDaysRemainingColor(project.daysRemaining)}`}
-          >
+          <span className="text-text-secondary text-xs font-medium">
             {project.daysRemaining >= 0
               ? `${project.daysRemaining} days left`
               : `${Math.abs(project.daysRemaining)} days overdue`}
           </span>
-          {/* <Button
-            variant="ghost"
-            size="xs"
-            iconName="ArrowRight"
-            iconSize={14}
-            onClick={() => router.push("/project-management-dashboard")}
-          /> */}
         </div>
       </div>
     </div>
