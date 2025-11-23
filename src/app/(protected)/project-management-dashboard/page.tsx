@@ -746,7 +746,7 @@ const ProjectManagementDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="flex flex-col">
             {/* Left Sidebar */}
             <div className="lg:col-span-3">
               <div className="space-y-6">
