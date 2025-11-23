@@ -58,13 +58,6 @@ const SiteLocationForm: React.FC<SiteLocationFormProps> = ({ form }) => {
     { value: "UK", label: "United Kingdom" },
   ];
 
-  // Mock coordinates for Hyderabad
-  const watchLatitude = form.watch("siteLocation.latitude");
-  const watchLongitude = form.watch("siteLocation.longitude");
-  const mapSrc =
-    watchLatitude && watchLongitude
-      ? `https://www.google.com/maps?q=${watchLatitude},${watchLongitude}&z=14&output=embed`
-      : `https://www.google.com/maps?q=17.3850,78.4867&z=14&output=embed`;
 
   return (
     <div className="bg-surface border-border rounded-lg border">
@@ -240,27 +233,6 @@ const SiteLocationForm: React.FC<SiteLocationFormProps> = ({ form }) => {
                 </FormItem>
               )}
             />
-          </div>
-
-          {/* Map Preview */}
-          <div className="space-y-2">
-            <label className="text-text-primary block text-sm font-medium">
-              Location Preview
-            </label>
-            <div className="border-border h-64 w-full overflow-hidden rounded-md border">
-              <iframe
-                width="100%"
-                height="100%"
-                loading="lazy"
-                title="Site Location"
-                referrerPolicy="no-referrer-when-downgrade"
-                src={mapSrc}
-                className="border-0"
-              />
-            </div>
-            <p className="text-text-secondary text-xs">
-              Map will update based on provided coordinates or address
-            </p>
           </div>
         </div>
       )}

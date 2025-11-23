@@ -448,9 +448,8 @@ const ProjectCreation: React.FC = () => {
               {/* {Object.keys(form.formState.errors).length > 0 && (
                 <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
               )} */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-                {/* Left Panel - Main Form */}
-                <div className="space-y-6 lg:col-span-7">
+              <div className="mx-auto max-w-4xl">
+                <div className="space-y-6">
                   <ClientInformationForm form={form} />
                   <ProjectDetailsForm form={form} />
                   <SiteLocationForm form={form} />
