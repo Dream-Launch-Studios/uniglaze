@@ -58,7 +58,7 @@ const Navbar = () => {
                 Sign In
               </Button>
             ) : (
-              <Button variant="hero" onClick={() => void signOut()}>
+              <Button variant="hero" onClick={() => void signOut()} className="justify-start rounded-full bg-black p-4">
                 Sign Out
               </Button>
             )}
@@ -93,7 +93,7 @@ const Navbar = () => {
                     Sign In
                   </Button>
                 ) : (
-                  <Button variant="hero" onClick={() => void signOut()}>
+                  <Button variant="hero" onClick={() => void signOut()} className="justify-start rounded-full bg-black p-4">
                     Sign Out
                   </Button>
                 )}
