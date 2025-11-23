@@ -170,23 +170,37 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
         },
       ];
 
+      const clientEmail = project?.latestProjectVersion?.client?.clientEmail ?? "";
+      const clientCCEmails = project?.latestProjectVersion?.client?.clientCCEmails
+        ?.split(",")
+        .map((email) => email.trim())
+        .filter((email) => email.length > 0) ?? [];
+
       await sendEmail({
-        to: project?.latestProjectVersion?.client?.clientEmail ?? "",
-        cc:
-          project?.latestProjectVersion?.client?.clientCCEmails
-            ?.split(",")
-            .map((email) => email.trim()) ?? [],
+        to: "onboarding@resend.dev",
+        cc: [
+          ...(clientEmail ? [clientEmail] : []),
+          ...clientCCEmails,
+          "vamsi@uniglaze.in",
+        ],
         subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString()}`,
         emailProps: { toClient: true, clientName: "Vali" },
         attachments: clientAttachments,
       });
 
+      const internalEmail = project?.latestProjectVersion?.client?.internalEmail ?? "";
+      const internalCCEmails = project?.latestProjectVersion?.client?.internalCCEmails
+        ?.split(",")
+        .map((email) => email.trim())
+        .filter((email) => email.length > 0) ?? [];
+
       await sendEmail({
-        to: project?.latestProjectVersion?.client?.internalEmail ?? "",
-        cc:
-          project?.latestProjectVersion?.client?.internalCCEmails
-            ?.split(",")
-            .map((email) => email.trim()) ?? [],
+        to: "onboarding@resend.dev",
+        cc: [
+          ...(internalEmail ? [internalEmail] : []),
+          ...internalCCEmails,
+          "vamsi@uniglaze.in",
+        ],
         subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString()}`,
         emailProps: { toClient: false },
         attachments: teamAttachments,

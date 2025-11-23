@@ -3,18 +3,10 @@
 import React from "react";
 import { env } from "@/env";
 import { render } from "@react-email/components";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import DailyProgressEmail, { type EmailProps } from "@/emails/email-template";
 
-const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: Number(env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
-  },
-});
+const resend = new Resend(env.RESEND_API_KEY);
 
 type ClientAttachment = { filename: string; content: Blob | Buffer };
 
@@ -46,23 +38,25 @@ export async function sendEmail({
     // Create the React element on the server side
     const reactElement = React.createElement(DailyProgressEmail, emailProps);
 
-    // console.log("Rendering with React Email...");
     const html = await render(reactElement);
 
     if (!html || html.length < 100) {
       throw new Error("React Email produced empty/invalid HTML");
     }
 
-    return await transporter.sendMail({
+    return await resend.emails.send({
       from: env.EMAIL_FROM,
       to,
-      cc,
+      cc: cc.length > 0 ? cc : undefined,
       subject,
       html,
-      attachments: normalizedAttachments, // ✅ Buffer only now
+      attachments: normalizedAttachments.map((att) => ({
+        filename: att.filename,
+        content: att.content,
+      })),
     });
   } catch (error) {
-    console.error("❌ React Email failed:", error);
+    console.error("❌ Email sending failed:", error);
     throw error;
   }
 }
