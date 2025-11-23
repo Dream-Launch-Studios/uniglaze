@@ -13,11 +13,11 @@ export default async function Home() {
       <div className="bg-background min-h-screen">
         <Navbar />
         <Hero />
-        <Features />
+        {/* <Features />
         <ProblemSolution />
         <UserRoles />
         <CTA />
-        <Footer />
+        <Footer /> */}
       </div>
     </HydrateClient>
   );

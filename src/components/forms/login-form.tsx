@@ -31,6 +31,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { APP_PATHS } from "@/config/path.config";
+import Image from "next/image";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -70,7 +71,14 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader className="text-center">
+        <CardHeader className="text-center items-center">
+          <Image
+            src="https://firebasestorage.googleapis.com/v0/b/plypicker-e35d7.appspot.com/o/dualite%2Funiglaze%2Fcompany%20logo.png?alt=media&token=3f10a9bd-1da3-4c61-b8b5-8c3f8e317f36"
+            alt="Uniglazeeeeeeeeeeee"
+            width={100}
+            height={100}
+            className="h-fit w-fit mx-auto mb-10"
+          />
           <CardTitle className="text-xl">Welcome back</CardTitle>
           <CardDescription>Login with your Google account</CardDescription>
         </CardHeader>

@@ -17,11 +17,6 @@ const Navbar = () => {
 
   const redirect = useRouter();
 
-  const navItems = [
-    { label: "Features", href: "#features" },
-    { label: "Workflow", href: "#workflow" },
-    { label: "Contact", href: "#contact" },
-  ];
 
   return (
     <nav className="bg-background/80 border-border/50 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-lg">
@@ -40,15 +35,6 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden items-center gap-8 md:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-foreground hover:text-primary font-medium transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
             {session?.user && (
               <Link
                 href="./dashboard"
@@ -67,7 +53,7 @@ const Navbar = () => {
                 onClick={() => {
                   redirect.push(APP_PATHS.LOGIN);
                 }}
-                className="justify-start"
+                className="justify-start rounded-full bg-black p-4"
               >
                 Sign In
               </Button>
@@ -95,16 +81,6 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="border-border/50 border-t py-4 md:hidden">
             <div className="flex flex-col space-y-4">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="text-foreground hover:text-primary px-2 py-1 font-medium transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              ))}
               <div className="border-border/50 flex flex-col gap-3 border-t pt-4">
                 {!session?.user ? (
                   <Button
@@ -112,7 +88,7 @@ const Navbar = () => {
                     onClick={() => {
                       redirect.push(APP_PATHS.LOGIN);
                     }}
-                    className="justify-start"
+                    className="justify-start rounded-full bg-black p-4"
                   >
                     Sign In
                   </Button>
