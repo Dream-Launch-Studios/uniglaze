@@ -10,6 +10,16 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 type ClientAttachment = { filename: string; content: Blob | Buffer };
 
+function getPlainTextContent(toClient: boolean, currentDate: string): string {
+  const greeting = toClient ? "Dear Valued Client," : "Dear Team,";
+  return `${greeting}
+
+Please find attached the Daily Progress Report for ${currentDate}, along with the mail for your reference.
+
+Best regards,
+Uniglaze team`;
+}
+
 export async function sendEmail({
   to,
   cc,
@@ -41,8 +51,20 @@ export async function sendEmail({
     const html = await render(reactElement);
 
     if (!html || html.length < 100) {
+      console.error("❌ Generated HTML is too short:", html?.substring(0, 200));
       throw new Error("React Email produced empty/invalid HTML");
     }
+
+    const currentDate = new Date().toLocaleDateString();
+    const text = getPlainTextContent(emailProps.toClient, currentDate);
+
+    console.log("📧 Sending email:", {
+      to,
+      cc,
+      subject,
+      htmlLength: html.length,
+      textLength: text.length,
+    });
 
     return await resend.emails.send({
       from: "vamsi@uniglaze.in",
@@ -50,6 +72,7 @@ export async function sendEmail({
       cc: cc.length > 0 ? cc : undefined,
       subject,
       html,
+      text,
       attachments: normalizedAttachments.map((att) => ({
         filename: att.filename,
         content: att.content,
