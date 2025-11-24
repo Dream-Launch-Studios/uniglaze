@@ -938,12 +938,6 @@ const Dashboard: React.FC = () => {
                     )}
                   </div>
                 </div>
-
-                {/* Activity Feed and Notifications */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  <RecentActivityFeed activities={mockActivities} />
-                  <NotificationPanel notifications={mockNotifications} />
-                </div>
               </div>
             </div>
           </div>

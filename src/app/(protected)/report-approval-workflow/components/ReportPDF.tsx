@@ -697,49 +697,6 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
           )}
         </View>
 
-        {/* Internal Blockages */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Internal Blockages & Issues</Text>
-          {internalBlockages?.length ? (
-            internalBlockages.map((blockage, idx) => (
-              <View key={idx} style={styles.blockageCard}>
-                <Text style={styles.blockageTitle}>
-                  Blockage: {blockage?.category ?? "N/A"}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Type: <Text style={styles.blockageType}>Internal</Text>
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Description: {blockage?.description}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Weather Report: {blockage?.weatherReport}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Reported on:{" "}
-                  {formatDate(blockage?.blockageStartTime ?? new Date())}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Closed on:{" "}
-                  {blockage?.blockageEndTime
-                    ? formatDate(blockage.blockageEndTime)
-                    : "N/A"}
-                </Text>
-                {blockage?.blockagePhotos?.length ? (
-                  <Image
-                    src={blockage?.blockagePhotos[0]?.url ?? ""}
-                    style={styles.photo}
-                  />
-                ) : null}
-              </View>
-            ))
-          ) : (
-            <Text style={styles.blockageDescription}>
-              No internal blockages available
-            </Text>
-          )}
-        </View>
-
         {/* footer */}
         <Text
           style={{
@@ -759,14 +716,7 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
 
 export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
   const latest = report.project.latestProjectVersion;
-  // remove empty blockages
-  const internalBlockages =
-    report.project.latestProjectVersion?.sheet1?.flatMap((item: Sheet1Item) =>
-      item.blockages
-        ?.filter((blockage: BlockageItem) => blockage.type === "INTERNAL")
-        ?.filter((blockage: BlockageItem) => blockage.description !== ""),
-    );
-  // remove empty blockages
+  // remove empty blockages - only CLIENT type blockages for client reports
   const clientBlockages = report.project.latestProjectVersion?.sheet1?.flatMap(
     (item: Sheet1Item) =>
       item.blockages
@@ -955,49 +905,6 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
           ) : (
             <Text style={styles.blockageDescription}>
               No client-side blockages available
-            </Text>
-          )}
-        </View>
-
-        {/* Internal Blockages */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Internal Blockages & Issues</Text>
-          {internalBlockages?.length ? (
-            internalBlockages.map((blockage, idx) => (
-              <View key={idx} style={styles.blockageCard}>
-                <Text style={styles.blockageTitle}>
-                  Blockage: {blockage?.category ?? "N/A"}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Type: <Text style={styles.blockageType}>Internal</Text>
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Description: {blockage?.description}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Weather Report: {blockage?.weatherReport}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Reported on:{" "}
-                  {formatDate(blockage?.blockageStartTime ?? new Date())}
-                </Text>
-                <Text style={styles.blockageDescription}>
-                  Closed on:{" "}
-                  {blockage?.blockageEndTime
-                    ? formatDate(blockage.blockageEndTime)
-                    : "N/A"}
-                </Text>
-                {blockage?.blockagePhotos?.length ? (
-                  <Image
-                    src={blockage?.blockagePhotos[0]?.url ?? ""}
-                    style={styles.photo}
-                  />
-                ) : null}
-              </View>
-            ))
-          ) : (
-            <Text style={styles.blockageDescription}>
-              No internal blockages available
             </Text>
           )}
         </View>
