@@ -697,6 +697,51 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
           )}
         </View>
 
+        {/* Internal Blockages */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Internal Blockages & Issues
+          </Text>
+          {internalBlockages && internalBlockages?.length > 0 ? (
+            internalBlockages.map((blockage, idx) => (
+              <View key={idx} style={styles.blockageCard}>
+                <Text style={styles.blockageTitle}>
+                  Blockage: {blockage?.category ?? "N/A"}
+                </Text>
+                <Text style={styles.blockageDescription}>
+                  Type: <Text style={styles.blockageType}>Internal</Text>
+                </Text>
+                <Text style={styles.blockageDescription}>
+                  Description: {blockage?.description}
+                </Text>
+                <Text style={styles.blockageDescription}>
+                  Weather Report: {blockage?.weatherReport}
+                </Text>
+                <Text style={styles.blockageDescription}>
+                  Reported on:{" "}
+                  {formatDate(blockage?.blockageStartTime ?? new Date())}
+                </Text>
+                <Text style={styles.blockageDescription}>
+                  Closed on:{" "}
+                  {blockage?.blockageEndTime
+                    ? formatDate(blockage.blockageEndTime)
+                    : "N/A"}
+                </Text>
+                {blockage?.blockagePhotos?.length ? (
+                  <Image
+                    src={blockage?.blockagePhotos[0]?.url ?? ""}
+                    style={styles.photo}
+                  />
+                ) : null}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.blockageDescription}>
+              No internal blockages available
+            </Text>
+          )}
+        </View>
+
         {/* footer */}
         <Text
           style={{
