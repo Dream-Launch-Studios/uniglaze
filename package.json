@@ -100,6 +100,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.0.15",
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^20.14.10",
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.0.0",
