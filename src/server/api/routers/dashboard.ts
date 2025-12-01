@@ -361,22 +361,24 @@ export const dashboardRouter = createTRPCRouter({
       },
     });
 
-    const projectDeadlineAlerts = results2.map((project) => ({
-      id: project?.projectVersions[0]?.id,
-      projectName: project?.projectVersions[0]?.projectName,
-      projectDescription: project?.projectVersions[0]?.projectDescription,
-      estimatedEndDate: project?.projectVersions[0]?.estimatedEndDate,
-      projectStatus: project?.projectVersions[0]?.projectStatus,
-      assignedProjectManager:
-        project?.projectVersions[0]?.assignedProjectManager,
-    })) as unknown as {
-      id: number;
-      projectName: string;
-      projectDescription: string;
-      estimatedEndDate: Date;
-      projectStatus: ProjectStatus;
-      assignedProjectManager: { name: string; email: string };
-    }[];
+    const projectDeadlineAlerts = results2
+      .filter((project) => project.projectVersions.length > 0)
+      .map((project) => ({
+        id: project.projectVersions[0]!.id,
+        projectName: project.projectVersions[0]!.projectName,
+        projectDescription: project.projectVersions[0]!.projectDescription,
+        estimatedEndDate: project.projectVersions[0]!.estimatedEndDate,
+        projectStatus: project.projectVersions[0]!.projectStatus,
+        assignedProjectManager:
+          project.projectVersions[0]!.assignedProjectManager,
+      })) as unknown as {
+        id: number;
+        projectName: string;
+        projectDescription: string;
+        estimatedEndDate: Date;
+        projectStatus: ProjectStatus;
+        assignedProjectManager: { name: string; email: string };
+      }[];
 
     return {
       recentBlockagesInProjects: recentBlockagesInProjects.slice(0, 3),

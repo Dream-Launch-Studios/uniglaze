@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from "lucide-react";
 import heroImage from "@/../public/image.png";
 import Image from "next/image";
+import { InstallPwaButton } from "./install-pwa-button";
 
 const Hero = () => {
   return (
@@ -31,14 +32,19 @@ const Hero = () => {
               architectural visions into reality.
             </p>
 
-            {/* Learn More Button */}
-            <Button
-              size="lg"
-              className="bg-blue-900 hover:bg-blue-800 text-white rounded-full px-8 py-6 h-auto"
-            >
-              Learn More
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            {/* Primary actions */}
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Button
+                size="lg"
+                className="bg-blue-900 hover:bg-blue-800 text-white rounded-full px-8 py-6 h-auto"
+              >
+                Learn More
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+
+              {/* This button only shows on devices/browsers where the PWA can be installed */}
+              <InstallPwaButton label="Install app on your device" />
+            </div>
           </div>
 
           {/* Right Column - Building Image */}

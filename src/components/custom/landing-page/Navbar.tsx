@@ -87,15 +87,35 @@ const Navbar = () => {
                     variant="hero"
                     onClick={() => {
                       redirect.push(APP_PATHS.LOGIN);
+                      setIsMenuOpen(false);
                     }}
                     className="justify-start rounded-full bg-black p-4"
                   >
                     Sign In
                   </Button>
                 ) : (
-                  <Button variant="hero" onClick={() => void signOut()} className="justify-start rounded-full bg-black p-4">
-                    Sign Out
-                  </Button>
+                  <>
+                    <Button
+                      variant="hero"
+                      onClick={() => {
+                        redirect.push(APP_PATHS.DASHBAORD);
+                        setIsMenuOpen(false);
+                      }}
+                      className="justify-start rounded-full bg-black p-4"
+                    >
+                      Dashboard
+                    </Button>
+                    <Button
+                      variant="hero"
+                      onClick={() => {
+                        void signOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="justify-start rounded-full bg-black p-4"
+                    >
+                      Sign Out
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
