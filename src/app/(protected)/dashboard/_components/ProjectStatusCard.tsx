@@ -1,12 +1,22 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import Icon from "../../../../components/rocket/components/AppIcon";
 import Button from "../../../../components/rocket/components/ui/Button";
 import { PriorityLevel, Role, type ProjectStatus } from "@prisma/client";
 import type { Session } from "@/server/auth";
 import { useSession } from "@/lib/auth-client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Project {
   name: string;
@@ -24,26 +34,10 @@ interface Project {
 interface ProjectStatusCardProps {
   project: Project;
   onClick: () => void;
+  onDelete?: () => void;
 }
 
-const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
-  project,
-  onClick,
-}) => {
-  const router = useRouter();
-
-  const getStatusColor = (status: string): string => {
-    return "text-text-secondary";
-  };
-
-  const getPriorityColor = (priority: string): string => {
-    return "bg-primary/5 text-primary border-primary/10";
-  };
-
-  const getDaysRemainingColor = (days: number): string => {
-    return "text-text-secondary";
-  };
-
+const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({ project, onClick, onDelete }) => {
   const formatProgress = (progress: number): number => {
     return Math.round(progress);
   };
@@ -68,28 +62,68 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({
             {project.client}
           </p>
         </div>
-        <div className="ml-4 flex items-center space-x-2">
-          <span
-            className={`rounded-md border px-2 py-1 text-xs font-medium ${getPriorityColor(project.priority.toString())}`}
-          >
-            {project.priority}
-          </span>
-          <span
-            className={`bg-muted text-text-secondary border-border rounded-md border px-2 py-1 text-xs font-medium`}
-          >
-            {project.status}
-          </span>
-        </div>
         {session?.user?.customRole !== Role.PROJECT_MANAGER && (
-          <div className="ml-2 flex items-center space-x-2">
+          <div className="ml-4 flex items-center space-x-2">
             <Button
               variant="ghost"
               size="sm"
               className="text-primary hover:bg-primary/5"
+              onClick={(event) => {
+                event.stopPropagation();
+                onClick();
+              }}
             >
               <Icon name="Edit" size={14} />
               <span className="text-sm font-medium">Edit</span>
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="hover:bg-destructive/90"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                >
+                  <Icon name="Trash2" size={14} />
+                  <span className="text-sm font-medium">Delete</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Delete this project?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently remove
+                    the project{" "}
+                    <span className="font-semibold">
+                      {project.name}
+                    </span>
+                    {" "}from the dashboard.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (typeof onDelete === "function") {
+                        onDelete();
+                      }
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>

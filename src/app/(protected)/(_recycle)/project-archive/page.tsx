@@ -701,7 +701,7 @@ const ProjectArchive = () => {
       <div className="bg-background min-h-screen">
         <Header />
         <Sidebar />
-        <main className="min-h-screen pt-16 md:ml-60">
+        <main className="min-h-screen pt-24 md:ml-60 md:pt-20">
           <div className="p-6">
             <div className="flex h-64 items-center justify-center">
               <div className="text-center">
@@ -726,7 +726,7 @@ const ProjectArchive = () => {
       <Header />
       <Sidebar />
 
-      <main className="min-h-screen pt-16 md:ml-60">
+      <main className="min-h-screen pt-24 md:ml-60 md:pt-20">
         <div className="p-6">
           <Breadcrumb />
 

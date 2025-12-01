@@ -663,7 +663,7 @@ const BlockageManagement: React.FC = () => {
       <Header />
       <Sidebar />
 
-      <main className="pt-16 pb-20 md:ml-60 md:pb-6">
+      <main className="pt-24 pb-20 md:ml-60 md:pt-20 md:pb-6">
         <div className="p-6">
           <Breadcrumb />
 

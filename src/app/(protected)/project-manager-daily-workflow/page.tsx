@@ -275,7 +275,7 @@ const ProjectManagerDailyWorkflow: React.FC = () => {
       <Header />
       <Sidebar />
 
-      <main className="pt-16 pb-8 md:ml-60">
+      <main className="pt-24 pb-8 md:ml-60 md:pt-20">
         <div className="p-6">
           <Breadcrumb />
 

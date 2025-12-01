@@ -265,7 +265,7 @@ const SheetCreationWorkflow: React.FC = () => {
       <Header />
       <Sidebar />
 
-      <main className="pt-16 pb-20 md:ml-60 md:pb-8">
+      <main className="pt-24 pb-20 md:ml-60 md:pt-20 md:pb-8">
         <div className="p-6">
           <Breadcrumb />
 

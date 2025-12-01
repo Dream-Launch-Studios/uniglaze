@@ -116,7 +116,7 @@ const ReportPreview = () => {
       <Header />
       <Sidebar />
 
-      <main className="bg-surface min-h-screen max-w-5xl overflow-y-auto pt-16 pb-20 md:ml-60 md:pb-8">
+      <main className="bg-surface min-h-screen max-w-5xl overflow-y-auto pt-24 pb-20 md:ml-60 md:pt-20 md:pb-8">
         <div className="p-6">
           <Breadcrumb />
           {/* Header */}
