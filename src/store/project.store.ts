@@ -460,12 +460,24 @@ export const useProjectStore = create<ProjectState>()(
           state.latestProjectVersion.sheet1.forEach((item) => {
             item.sheet2.forEach((subItem) => {
               if (subItem.yesterdayProgressReport) {
-                subItem.totalSupplied =
+                const totalQuantity = subItem.totalQuantity ?? 0;
+
+                const newTotalSupplied =
                   subItem.totalSupplied +
                   subItem.yesterdayProgressReport.yesterdaySupplied;
-                subItem.totalInstalled =
+                const newTotalInstalled =
                   subItem.totalInstalled +
                   subItem.yesterdayProgressReport.yesterdayInstalled;
+
+                // Hard cap at total quantity so we never exceed it
+                subItem.totalSupplied = Math.min(
+                  newTotalSupplied,
+                  totalQuantity,
+                );
+                subItem.totalInstalled = Math.min(
+                  newTotalInstalled,
+                  totalQuantity,
+                );
                 subItem.percentSupplied = +(
                   (subItem.totalSupplied / subItem.totalQuantity) *
                   100
@@ -475,12 +487,22 @@ export const useProjectStore = create<ProjectState>()(
                   100
                 ).toFixed(2);
                 if (subItem.connectWithSheet1Item) {
-                  item.totalSupplied =
+                  const newItemTotalSupplied =
                     item.totalSupplied +
                     (subItem.yesterdayProgressReport?.yesterdaySupplied ?? 0);
-                  item.totalInstalled =
+                  const newItemTotalInstalled =
                     item.totalInstalled +
                     (subItem.yesterdayProgressReport?.yesterdayInstalled ?? 0);
+
+                  // Hard cap at item total quantity as well
+                  item.totalSupplied = Math.min(
+                    newItemTotalSupplied,
+                    item.totalQuantity,
+                  );
+                  item.totalInstalled = Math.min(
+                    newItemTotalInstalled,
+                    item.totalQuantity,
+                  );
                   item.yetToSupply = item.totalQuantity - item.totalSupplied;
                   item.yetToInstall = item.totalQuantity - item.totalInstalled;
                   item.percentSupplied = +(

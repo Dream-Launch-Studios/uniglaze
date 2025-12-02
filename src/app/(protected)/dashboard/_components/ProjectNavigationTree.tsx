@@ -6,7 +6,9 @@ import Icon from "../../../../components/rocket/components/AppIcon";
 import Button from "../../../../components/rocket/components/ui/Button";
 import Input from "../../../../components/rocket/components/ui/Input";
 import type * as LucideIcons from "lucide-react";
-import { ProjectStatus } from "@prisma/client";
+import { ProjectStatus, Role } from "@prisma/client";
+import { useSession } from "@/lib/auth-client";
+import type { Session } from "@/server/auth";
 interface Project {
   id: number;
   name: string;
@@ -39,6 +41,11 @@ const ProjectNavigationTree: React.FC<ProjectNavigationTreeProps> = ({
     new Set(),
   );
   const router = useRouter();
+  const { data: session } = useSession() as {
+    data: Session | null;
+    isPending: boolean;
+  };
+  const userRole = session?.user?.customRole;
 
   const filteredProjects = projects.filter(
     (project: Project) =>
@@ -95,17 +102,19 @@ const ProjectNavigationTree: React.FC<ProjectNavigationTreeProps> = ({
           onChange={handleInputChange}
           className="mb-4"
         />
-        <Button
-          variant="default"
-          size="sm"
-          iconName="Plus"
-          iconPosition="left"
-          iconSize={16}
-          onClick={() => router.push("/project-creation")}
-          className="w-full"
-        >
-          Create New Project
-        </Button>
+        {userRole !== Role.PROJECT_MANAGER && (
+          <Button
+            variant="default"
+            size="sm"
+            iconName="Plus"
+            iconPosition="left"
+            iconSize={16}
+            onClick={() => router.push("/project-creation")}
+            className="w-full"
+          >
+            Create New Project
+          </Button>
+        )}
       </div>
 
       <div className="max-h-96 overflow-y-auto">

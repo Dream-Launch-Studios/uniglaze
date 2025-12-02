@@ -47,14 +47,41 @@ const ItemForm = ({
   const sheet2 = getSheet2(itemIndex);
   // const totalNumOfSubItemsInSheet1 = getTotalNumOfSubItemsInSheet1(itemIndex);
 
-  const formSchema = z.object({
-    ...Object.fromEntries(
-      Array.from({ length: sheet2?.length ?? 0 }, (_, i) => [
-        [`suppliedYesterday${i}`, z.coerce.number().min(0)],
-        [`installedYesterday${i}`, z.coerce.number().min(0)],
-      ]).flat(),
-    ),
-  });
+  const formSchema = z.object(
+    Object.fromEntries(
+      (sheet2 ?? []).flatMap((subItem, i) => {
+        const totalQuantity = subItem.totalQuantity ?? 0;
+        const currentSupplied = subItem.totalSupplied ?? 0;
+        const currentInstalled = subItem.totalInstalled ?? 0;
+
+        const remainingSupply = Math.max(0, totalQuantity - currentSupplied);
+        const remainingInstall = Math.max(0, totalQuantity - currentInstalled);
+
+        return [
+          [
+            `suppliedYesterday${i}`,
+            z.coerce
+              .number()
+              .min(0, "Supplied yesterday cannot be negative")
+              .max(
+                remainingSupply,
+                `Supplied yesterday + current supplied cannot exceed total (${remainingSupply} remaining)`,
+              ),
+          ],
+          [
+            `installedYesterday${i}`,
+            z.coerce
+              .number()
+              .min(0, "Installed yesterday cannot be negative")
+              .max(
+                remainingInstall,
+                `Installed yesterday + current installed cannot exceed total (${remainingInstall} remaining)`,
+              ),
+          ],
+        ];
+      }),
+    ) as Record<string, z.ZodTypeAny>,
+  );
 
   const getDefaultValuesForItem = (itemIndex: number) => ({
     ...Object.fromEntries(

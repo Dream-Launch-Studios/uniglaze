@@ -456,13 +456,21 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
               {item.yesterdayProgressPhotos?.length ? (
                 item.yesterdayProgressPhotos.map((photoSet, pid) => (
                   <View key={pid} style={styles.photoContainer}>
-                    {photoSet.photos.slice(0, 1).map((photo, phidx) => (
-                      <Image
-                        key={phidx}
-                        src={photo.url ?? ""}
-                        style={styles.photo}
-                      />
-                    ))}
+                    {photoSet.photos.slice(0, 1).map((photo, phidx) => {
+                      const imageUrl = photo.url;
+                      // Only render image if URL is valid and not empty
+                      if (!imageUrl || imageUrl.trim() === "") {
+                        return null;
+                      }
+                      return (
+                        <Image
+                          key={phidx}
+                          src={imageUrl}
+                          style={styles.photo}
+                          cache={false}
+                        />
+                      );
+                    })}
                     <Text style={styles.photoDescription}>
                       Progress Description:{" "}
                       {photoSet.description || "No description"}
@@ -682,10 +690,13 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
                     ? formatDate(blockage.blockageEndTime)
                     : "N/A"}
                 </Text>
-                {blockage?.blockagePhotos?.length ? (
+                {blockage?.blockagePhotos?.length &&
+                blockage.blockagePhotos[0]?.url &&
+                blockage.blockagePhotos[0].url.trim() !== "" ? (
                   <Image
-                    src={blockage?.blockagePhotos[0]?.url ?? ""}
+                    src={blockage.blockagePhotos[0].url}
                     style={styles.photo}
+                    cache={false}
                   />
                 ) : null}
               </View>
@@ -727,10 +738,13 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
                     ? formatDate(blockage.blockageEndTime)
                     : "N/A"}
                 </Text>
-                {blockage?.blockagePhotos?.length ? (
+                {blockage?.blockagePhotos?.length &&
+                blockage.blockagePhotos[0]?.url &&
+                blockage.blockagePhotos[0].url.trim() !== "" ? (
                   <Image
-                    src={blockage?.blockagePhotos[0]?.url ?? ""}
+                    src={blockage.blockagePhotos[0].url}
                     style={styles.photo}
+                    cache={false}
                   />
                 ) : null}
               </View>
@@ -887,13 +901,21 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
               {item.yesterdayProgressPhotos?.length ? (
                 item.yesterdayProgressPhotos.map((photoSet, pid) => (
                   <View key={pid} style={styles.photoContainer}>
-                    {photoSet.photos.slice(0, 1).map((photo, phidx) => (
-                      <Image
-                        key={phidx}
-                        src={photo.url ?? ""}
-                        style={styles.photo}
-                      />
-                    ))}
+                    {photoSet.photos.slice(0, 1).map((photo, phidx) => {
+                      const imageUrl = photo.url;
+                      // Only render image if URL is valid and not empty
+                      if (!imageUrl || imageUrl.trim() === "") {
+                        return null;
+                      }
+                      return (
+                        <Image
+                          key={phidx}
+                          src={imageUrl}
+                          style={styles.photo}
+                          cache={false}
+                        />
+                      );
+                    })}
                     <Text style={styles.photoDescription}>
                       Progress Description:{" "}
                       {photoSet.description || "No description"}
@@ -939,10 +961,13 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
                     ? formatDate(blockage.blockageEndTime)
                     : "N/A"}
                 </Text>
-                {blockage?.blockagePhotos?.length ? (
+                {blockage?.blockagePhotos?.length &&
+                blockage.blockagePhotos[0]?.url &&
+                blockage.blockagePhotos[0].url.trim() !== "" ? (
                   <Image
-                    src={blockage?.blockagePhotos[0]?.url ?? ""}
+                    src={blockage.blockagePhotos[0].url}
                     style={styles.photo}
+                    cache={false}
                   />
                 ) : null}
               </View>

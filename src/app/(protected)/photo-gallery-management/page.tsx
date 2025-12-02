@@ -14,6 +14,7 @@ import { api } from "@/trpc/react";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import type { Session } from "@/server/auth";
+import { Role } from "@prisma/client";
 // import PhotoUpload from "./components/PhotoUpload";
 // import BulkActions from "./components/BulkActions";
 // import PhotoEditModal from "./components/PhotoEditModal";
@@ -135,6 +136,9 @@ const PhotoGalleryManagement: React.FC = () => {
   const { data: projects, isLoading: isProjectsLoading } =
     api.project.getAllProjectsWithLatestVersion.useQuery(undefined, {});
 
+  const userRole = session?.user?.customRole;
+  const userId = session?.user?.id;
+
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<string>("date-desc");
@@ -187,23 +191,34 @@ const PhotoGalleryManagement: React.FC = () => {
   //         ) ?? [],
   //   ) ?? [];
   const mockPhotos: Photo[] =
-    projects?.data?.flatMap(
-      (project, index1) =>
-        project.latestProjectVersion?.sheet1
-          ?.filter(
-            (item) => !!item?.yesterdayProgressPhotos?.[0]?.photos[0]?.url,
-          )
-          .flatMap((item, index2) =>
-            (item.yesterdayProgressPhotos ?? []).map((photo, index3) => ({
-              id: `${index1}-${index2}-${index3}` || "",
-              projectId: project.latestProjectVersion?.projectId ?? index1,
-              thumbnail: photo?.photos[0]?.url ?? "",
-              description: photo?.description ?? "",
-              workItem: item.itemName ?? "",
-              uploadedBy: project?.assignedProjectManager?.name ?? "",
-            })),
-          ) ?? [],
-    ) ?? [];
+    projects?.data
+      ?.filter((project) => {
+        // If user is PM, only show photos from their assigned projects
+        if (userRole === Role.PROJECT_MANAGER && userId) {
+          return (
+            project.latestProjectVersion?.assignedProjectManagerId === userId
+          );
+        }
+        // For other roles, show all projects
+        return true;
+      })
+      ?.flatMap(
+        (project, index1) =>
+          project.latestProjectVersion?.sheet1
+            ?.filter(
+              (item) => !!item?.yesterdayProgressPhotos?.[0]?.photos[0]?.url,
+            )
+            .flatMap((item, index2) =>
+              (item.yesterdayProgressPhotos ?? []).map((photo, index3) => ({
+                id: `${index1}-${index2}-${index3}` || "",
+                projectId: project.latestProjectVersion?.projectId ?? index1,
+                thumbnail: photo?.photos[0]?.url ?? "",
+                description: photo?.description ?? "",
+                workItem: item.itemName ?? "",
+                uploadedBy: project?.assignedProjectManager?.name ?? "",
+              })),
+            ) ?? [],
+      ) ?? [];
 
   // console.log("MOCK PHOTOS", mockPhotos);
 

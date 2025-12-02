@@ -120,15 +120,21 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
     return { teamBlob, clientBlob };
   };
 
-  const triggerDownload = (blob: Blob, filename: string): void => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const triggerDownload = (blob: Blob, filename: string): Promise<void> => {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      // Small delay to ensure download starts before cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        resolve();
+      }, 100);
+    });
   };
 
   const handleDownloadPDF = async (): Promise<void> => {
@@ -138,8 +144,10 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       const projectName =
         project?.latestProjectVersion?.projectName ?? "daily-report";
 
-      triggerDownload(teamBlob, `${projectName}-team-report.pdf`);
-      triggerDownload(clientBlob, `${projectName}-client-report.pdf`);
+      // Download sequentially with small delay to avoid browser blocking
+      await triggerDownload(teamBlob, `${projectName}-internal-team-report.pdf`);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      await triggerDownload(clientBlob, `${projectName}-client-report.pdf`);
 
       toast.success("PDFs downloaded");
     } catch (error) {

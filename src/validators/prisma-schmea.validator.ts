@@ -165,6 +165,49 @@ export const projectVersionSchema = z
         "Project End Date must be after Start Date or Same as Start Date",
       path: ["estimatedEndDate"],
     },
+  )
+  .refine(
+    (data) => {
+      if (!data.sheet1) return true;
+
+      return data.sheet1.every((item) => {
+        const itemTotal = item.totalQuantity;
+
+        // Sheet1-level totals must never exceed totalQuantity
+        if (
+          item.totalSupplied > itemTotal ||
+          item.totalInstalled > itemTotal
+        ) {
+          return false;
+        }
+
+        // Sheet2-level totals (and yesterday + today) must never exceed totalQuantity
+        return item.sheet2.every((sub) => {
+          const subTotal = sub.totalQuantity;
+
+          if (
+            sub.totalSupplied > subTotal ||
+            sub.totalInstalled > subTotal
+          ) {
+            return false;
+          }
+
+          if (!sub.yesterdayProgressReport) return true;
+
+          const nextSupplied =
+            sub.totalSupplied + sub.yesterdayProgressReport.yesterdaySupplied;
+          const nextInstalled =
+            sub.totalInstalled + sub.yesterdayProgressReport.yesterdayInstalled;
+
+          return nextSupplied <= subTotal && nextInstalled <= subTotal;
+        });
+      });
+    },
+    {
+      message:
+        "Supplied/installed quantities (including yesterday's entries) cannot exceed total quantity.",
+      path: ["sheet1"],
+    },
   );
 
 export const projectSchema = z.object({
