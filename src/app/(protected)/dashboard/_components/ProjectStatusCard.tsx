@@ -76,54 +76,6 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({ project, onClick,
               <Icon name="Edit" size={14} />
               <span className="text-sm font-medium">Edit</span>
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="hover:bg-destructive/90"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
-                >
-                  <Icon name="Trash2" size={14} />
-                  <span className="text-sm font-medium">Delete</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent
-                onClick={(event) => {
-                  event.stopPropagation();
-                }}
-              >
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Delete this project?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently remove
-                    the project{" "}
-                    <span className="font-semibold">
-                      {project.name}
-                    </span>
-                    {" "}from the dashboard.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (typeof onDelete === "function") {
-                        onDelete();
-                      }
-                    }}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         )}
       </div>
