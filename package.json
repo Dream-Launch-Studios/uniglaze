@@ -13,6 +13,7 @@
     "db:push:deploy": "prisma db push --force-reset",
     "db:studio": "prisma studio",
     "db:seed": "bun run prisma/seed.ts",
+    "db:fix-auth-roles": "bun run prisma/fix-auth-roles.ts",
     "dev": "bun run db:start && sleep 5 && bun run db:push && bun run db:seed && bun run db:studio & next dev --turbo --port 4000",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",

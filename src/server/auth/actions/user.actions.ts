@@ -168,8 +168,20 @@ export const seedNewUser = async (
   try {
     const extractedUser = await db.user.findFirst({ where: { email } });
     if (!extractedUser) {
+      const role =
+        customRole === Role.MANAGING_DIRECTOR ||
+        customRole === Role.HEAD_OF_PLANNING
+          ? "admin"
+          : "user";
+
       await betterAuth.api.signUpEmail({
         body: { email, name, password, customRole },
+      });
+
+      // ensure seeded users have the correct auth role for admin APIs (e.g. password updates)
+      await db.user.update({
+        where: { email },
+        data: { role },
       });
     }
     return true;
