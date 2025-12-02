@@ -56,7 +56,7 @@ Step 2: UI1 - Main Project Structure
 Table Structure:
 Serial Number
 Item (e.g., UCW, Strip Glazing, Railing)
-Unit of Measurement (UOM) - e.g., "panel" for UCW
+UOM (UOM) - e.g., "panel" for UCW
 Total quantity
 Cumulative Supplied (default: 0)
 Cumulative Installed (default: 0)

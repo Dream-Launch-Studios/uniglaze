@@ -16,6 +16,8 @@ export const projectRouter = createTRPCRouter({
         projectVersion;
 
       const createdById = ctx.session.user.id;
+      const assignedProjectManagerId =
+        projectVersionData.assignedProjectManagerId || ctx.session.user.id;
 
       const createdProject = await ctx.db.project.create({
         data: {
@@ -23,6 +25,7 @@ export const projectRouter = createTRPCRouter({
           projectVersions: {
             create: {
               ...projectVersionData,
+              assignedProjectManagerId,
               siteLocation: siteLocation,
               client: client,
               sheet1: sheet1,

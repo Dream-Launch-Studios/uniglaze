@@ -112,7 +112,7 @@ Toggle to activate archive history of all updates and submissions
 A table capturing key project metrics:
 Serial Number
 Item
-Unit of Measurement
+UOM
 Total
 Cumulative Supplied
 Cumulative Installed

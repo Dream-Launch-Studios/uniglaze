@@ -114,7 +114,7 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
 
   const validateItem = (item: NewItemForm): string | null => {
     if (!item.itemName.trim()) return "Item name is required";
-    if (!item.unit.trim()) return "Unit of measurement is required";
+    if (!item.unit.trim()) return "UOM is required";
     if (!item.totalQuantity || item.totalQuantity <= 0)
       return "Total quantity must be greater than 0";
     if (item.totalSupplied && item.totalSupplied < 0)
@@ -338,7 +338,7 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
 
             <div>
               <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Unit of Measurement <span className="text-error">*</span>
+                UOM <span className="text-error">*</span>
               </label>
               <input
                 type="text"
