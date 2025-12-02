@@ -61,11 +61,11 @@ const ProjectNavigationTree: React.FC<ProjectNavigationTreeProps> = ({
   };
 
   const projectActions: ProjectAction[] = [
-    {
-      label: "Daily Report",
-      icon: "FileText",
-      route: "/daily-progress-report",
-    },
+    // {
+    //   label: "Daily Report",
+    //   icon: "FileText",
+    //   route: "/daily-progress-report",
+    // },
     {
       label: "Photo Gallery",
       icon: "Camera",
