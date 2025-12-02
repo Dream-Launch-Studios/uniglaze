@@ -1,10 +1,8 @@
-// src/app/api/admin/fix-auth-roles/route.ts
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
-import { db } from "@/server/db"; // you already have this
+import { db } from "@/server/db";
 
 export async function POST(req: Request) {
-  // ultra‑simple guard: require a secret header so randoms can't hit it
   const authHeader = req.headers.get("x-fix-secret");
   if (authHeader !== process.env.FIX_AUTH_ROLES_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,3 +32,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
