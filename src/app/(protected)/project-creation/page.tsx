@@ -33,6 +33,17 @@ import { Loader2 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import type { Session } from "@/server/auth";
 import { Role } from "@prisma/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const formSchema = projectVersionSchema
   .omit({
@@ -133,6 +144,26 @@ const ProjectCreation: React.FC = () => {
         setIsLoading(false);
       },
     });
+
+  const { mutateAsync: deleteProject } = api.project.deleteProject.useMutation({
+    onSuccess: () => {
+      toast.success("Project deleted successfully");
+      useProjectStore.getState().resetProject();
+      router.push("/dashboard");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleDeleteProject = async (): Promise<void> => {
+    const projectId = project.latestProjectVersion?.projectId;
+    if (!projectId) {
+      toast.error("Project ID not found");
+      return;
+    }
+    await deleteProject({ projectId });
+  };
 
   // Helper function to convert URL to File
   const urlToFile = async (
@@ -461,7 +492,40 @@ const ProjectCreation: React.FC = () => {
               {/* Action Buttons */}
               <div className="bg-card border-border mt-8 flex flex-col items-center justify-between space-y-4 rounded-lg border p-4 md:flex-row md:space-y-0">
                 {edit ? (
-                  <div className="ml-auto flex items-center space-x-3">
+                  <div className="flex w-full items-center justify-between">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          iconName="Trash2"
+                          iconPosition="left"
+                          disabled={isLoading}
+                        >
+                          Delete Project
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this project? This
+                            action cannot be undone. All project data, versions,
+                            and associated information will be permanently
+                            deleted.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteProject}
+                            className="bg-error hover:bg-error/90 text-error-foreground"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                     <Button
                       type="submit"
                       variant="default"

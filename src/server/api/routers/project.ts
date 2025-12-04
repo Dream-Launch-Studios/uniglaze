@@ -6,7 +6,7 @@ import {
 } from "@/validators/prisma-schmea.validator";
 import { Role } from "@prisma/client";
 import { url } from "inspector";
-import type z from "zod";
+import z from "zod";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -331,4 +331,59 @@ export const projectRouter = createTRPCRouter({
       }
     },
   ),
+
+  deleteProject: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        // Check if user has permission (only MD or HOP can delete)
+        if (
+          ctx.session.user.customRole !== Role.MANAGING_DIRECTOR &&
+          ctx.session.user.customRole !== Role.HEAD_OF_PLANNING
+        ) {
+          throw new Error("You do not have permission to delete projects");
+        }
+
+        // Check if project exists and was created by the user or user is MD
+        const project = await ctx.db.project.findUnique({
+          where: { id: input.projectId },
+          include: {
+            projectVersions: true,
+          },
+        });
+
+        if (!project) {
+          throw new Error("Project not found");
+        }
+
+        // Only allow deletion if user created it or is MD
+        if (
+          project.createdById !== ctx.session.user.id &&
+          ctx.session.user.customRole !== Role.MANAGING_DIRECTOR
+        ) {
+          throw new Error("You can only delete projects you created");
+        }
+
+        // Delete all project versions first (due to foreign key constraint)
+        await ctx.db.projectVersion.deleteMany({
+          where: { projectId: input.projectId },
+        });
+
+        // Then delete the project
+        await ctx.db.project.delete({
+          where: { id: input.projectId },
+        });
+
+        return {
+          success: true,
+          message: "Project deleted successfully",
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error instanceof Error ? error.message : "Failed to delete project",
+        };
+      }
+    }),
 });
