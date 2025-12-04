@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Icon from "@/components/rocket/components/AppIcon";
 import Image from "@/components/rocket/components/AppImage";
 import type { PriorityLevel, ReportStatus } from "@prisma/client";
+import { Role } from "@prisma/client";
 import type { BlockageType } from "@/validators/prisma-schmea.validator";
 import { cn } from "@/lib/utils";
 import { useProjectStore } from "@/store/project.store";
@@ -13,6 +14,13 @@ import {
   TableHeader,
   TableHead,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import Button from "@/components/rocket/components/ui/Button";
+import { useSession } from "@/lib/auth-client";
+import type { Session } from "@/server/auth";
+import { toast } from "sonner";
+import { api } from "@/trpc/react";
+import { projectVersionSchema } from "@/validators/prisma-schmea.validator";
 
 interface ProgressDetail {
   itemName: string;
@@ -78,7 +86,143 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
   onRequestChanges,
   onReject,
 }) => {
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const project = useProjectStore.getState().getProject();
+  const { editSheet1Item, editSheet2Item } = useProjectStore.getState();
+  const { data: session } = useSession() as {
+    data: Session | null;
+    isPending: boolean;
+  };
+
+  const utils = api.useUtils();
+  const { mutateAsync: createProjectVersion } =
+    api.project.createProjectVersion.useMutation({
+      onSuccess: async () => {
+        toast.success("Report updated successfully");
+        setIsEditMode(false);
+        await utils.project.getAllProjectsWithLatestVersion.invalidate();
+      },
+      onError: (error) => {
+        toast.error(error.message);
+        setIsSaving(false);
+      },
+    });
+
+  const isHeadOfPlanning =
+    session?.user?.customRole === Role.HEAD_OF_PLANNING ||
+    session?.user?.customRole === Role.MANAGING_DIRECTOR;
+
+  const calculateRemaining = (
+    total: number,
+    cumulative: number,
+  ): number => {
+    return Math.max(0, total - cumulative);
+  };
+
+  const calculatePercentage = (
+    cumulative: number,
+    total: number,
+  ): number => {
+    return total > 0 ? Math.round((cumulative / total) * 100) : 0;
+  };
+
+  const handleSave = async (): Promise<void> => {
+    setIsSaving(true);
+    try {
+      const currentProject = useProjectStore.getState().getProject();
+      const validated = projectVersionSchema.safeParse(
+        currentProject.latestProjectVersion,
+      );
+      if (!validated.success) {
+        toast.error(validated.error.message);
+        setIsSaving(false);
+        return;
+      }
+
+      await createProjectVersion({
+        ...validated.data,
+        projectId: currentProject.latestProjectVersion?.projectId,
+        yesterdayReportStatus:
+          currentProject.latestProjectVersion?.yesterdayReportStatus,
+      });
+    } catch (error) {
+      console.error("Error saving report:", error);
+      setIsSaving(false);
+    }
+  };
+
+  const handleSheet2Update = (
+    sheet1Index: number,
+    sheet2Index: number,
+    field: "totalSupplied" | "totalInstalled" | "totalQuantity",
+    value: number,
+  ): void => {
+    const subItem =
+      project.latestProjectVersion?.sheet1?.[sheet1Index]?.sheet2?.[sheet2Index];
+    if (!subItem) return;
+
+    const updatedSubItem = { ...subItem };
+    if (field === "totalQuantity") {
+      updatedSubItem.totalQuantity = value;
+    } else if (field === "totalSupplied") {
+      updatedSubItem.totalSupplied = Math.min(value, subItem.totalQuantity);
+    } else if (field === "totalInstalled") {
+      updatedSubItem.totalInstalled = Math.min(value, subItem.totalQuantity);
+    }
+
+    updatedSubItem.percentSupplied = calculatePercentage(
+      updatedSubItem.totalSupplied,
+      updatedSubItem.totalQuantity,
+    );
+    updatedSubItem.percentInstalled = calculatePercentage(
+      updatedSubItem.totalInstalled,
+      updatedSubItem.totalQuantity,
+    );
+
+    editSheet2Item(sheet1Index, sheet2Index, updatedSubItem);
+
+    // Update Sheet1 totals if connected
+    const sheet1Item = project.latestProjectVersion?.sheet1?.[sheet1Index];
+    if (sheet1Item && subItem.connectWithSheet1Item) {
+      // Recalculate Sheet1 totals from all connected Sheet2 items
+      const connectedSheet2Items = sheet1Item.sheet2.filter(
+        (item) => item.connectWithSheet1Item,
+      );
+      const newTotalSupplied = connectedSheet2Items.reduce(
+        (sum, item) => sum + (item.totalSupplied ?? 0),
+        0,
+      );
+      const newTotalInstalled = connectedSheet2Items.reduce(
+        (sum, item) => sum + (item.totalInstalled ?? 0),
+        0,
+      );
+
+      const updatedSheet1Item = {
+        ...sheet1Item,
+        totalSupplied: Math.min(newTotalSupplied, sheet1Item.totalQuantity),
+        totalInstalled: Math.min(newTotalInstalled, sheet1Item.totalQuantity),
+        yetToSupply: calculateRemaining(
+          sheet1Item.totalQuantity,
+          Math.min(newTotalSupplied, sheet1Item.totalQuantity),
+        ),
+        yetToInstall: calculateRemaining(
+          sheet1Item.totalQuantity,
+          Math.min(newTotalInstalled, sheet1Item.totalQuantity),
+        ),
+        percentSupplied: calculatePercentage(
+          Math.min(newTotalSupplied, sheet1Item.totalQuantity),
+          sheet1Item.totalQuantity,
+        ),
+        percentInstalled: calculatePercentage(
+          Math.min(newTotalInstalled, sheet1Item.totalQuantity),
+          sheet1Item.totalQuantity,
+        ),
+      };
+
+      editSheet1Item(sheet1Index, updatedSheet1Item);
+    }
+  };
 
   // const handleExportPDF = async (): Promise<void> => {
   //   if (!report) return;
@@ -173,17 +317,45 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
               Site Address: {project.latestProjectVersion?.siteLocation.city}
             </p>
           </div>
-          {/* <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              iconName="Download"
-              onClick={handleExportPDF}
-              disabled={isGeneratingPDF}
-            >
-              {isGeneratingPDF ? "Generating..." : "Export PDF"}
-            </Button>
-          </div> */}
+          {isHeadOfPlanning && report && (
+            <div className="flex items-center space-x-2">
+              {!isEditMode ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  iconName="Edit"
+                  iconPosition="left"
+                  onClick={() => setIsEditMode(true)}
+                >
+                  Edit Report
+                </Button>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    iconName="X"
+                    iconPosition="left"
+                    onClick={() => setIsEditMode(false)}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    iconName="Save"
+                    iconPosition="left"
+                    onClick={handleSave}
+                    loading={isSaving}
+                    disabled={isSaving}
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -266,8 +438,8 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {project.latestProjectVersion?.sheet1?.flatMap((item) =>
-                  item.sheet2.map((subItem) => (
+                {project.latestProjectVersion?.sheet1?.flatMap((item, sheet1Index) =>
+                  item.sheet2.map((subItem, sheet2Index) => (
                     <TableRow key={`${item.itemName}-${subItem.subItemName}`}>
                       <TableCell>{item.itemName}</TableCell>
                       <TableCell>{subItem.subItemName}</TableCell>
@@ -275,13 +447,66 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
                         {subItem.unit}
                       </TableCell>
                       <TableCell className="text-center">
-                        {subItem.totalQuantity}
+                        {isEditMode ? (
+                          <Input
+                            type="number"
+                            min={0}
+                            value={subItem.totalQuantity}
+                            onChange={(e) =>
+                              handleSheet2Update(
+                                sheet1Index,
+                                sheet2Index,
+                                "totalQuantity",
+                                +e.target.value,
+                              )
+                            }
+                            className="w-20 text-center"
+                          />
+                        ) : (
+                          subItem.totalQuantity
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
-                        {subItem.totalSupplied}
+                        {isEditMode ? (
+                          <Input
+                            type="number"
+                            min={0}
+                            max={subItem.totalQuantity}
+                            value={subItem.totalSupplied}
+                            onChange={(e) =>
+                              handleSheet2Update(
+                                sheet1Index,
+                                sheet2Index,
+                                "totalSupplied",
+                                +e.target.value,
+                              )
+                            }
+                            className="w-20 text-center"
+                          />
+                        ) : (
+                          subItem.totalSupplied
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
-                        {subItem.totalInstalled}
+                        {isEditMode ? (
+                          <Input
+                            type="number"
+                            min={0}
+                            max={subItem.totalQuantity}
+                            value={subItem.totalInstalled}
+                            onChange={(e) =>
+                              handleSheet2Update(
+                                sheet1Index,
+                                sheet2Index,
+                                "totalInstalled",
+                                +e.target.value,
+                              )
+                            }
+                            className="w-20 text-center"
+                          />
+                        ) : (
+                          subItem.totalInstalled
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
                         {subItem.yesterdayProgressReport?.yesterdayInstalled ??
