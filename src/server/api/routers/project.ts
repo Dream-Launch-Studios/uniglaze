@@ -442,7 +442,16 @@ export const projectRouter = createTRPCRouter({
             id: true,
             projectVersionCreatedAt: true,
             yesterdayReportCreatedAt: true,
+            yesterdayReportStatus: true,
+            projectName: true,
             sheet1: true,
+            client: true,
+            siteLocation: true,
+            assignedProjectManager: {
+              select: {
+                name: true,
+              },
+            },
           },
         });
 

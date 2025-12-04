@@ -15,6 +15,7 @@ import ProjectSelector from "./components/ProjectSelector";
 import MasterDataTable from "./components/MasterDataTable";
 import DetailedBreakdownTable from "./components/DetailedBreakdownTable";
 import ProgressVisualization from "./components/ProgressVisualization";
+import ReportHistory from "./components/ReportHistory";
 // import ActionToolbar from "./components/ActionToolbar";
 
 import Button from "@/components/rocket/components/ui/Button";
@@ -820,6 +821,16 @@ const ProjectManagementDashboard: React.FC = () => {
                       >
                         Progress Visualization
                       </button>
+                      <button
+                        onClick={() => handleTabChange("report-history")}
+                        className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
+                          activeTab === "report-history"
+                            ? "border-primary text-primary"
+                            : "text-text-secondary hover:text-text-primary border-transparent"
+                        }`}
+                      >
+                        Report History
+                      </button>
                     </nav>
                   </div>
 
@@ -844,6 +855,12 @@ const ProjectManagementDashboard: React.FC = () => {
                     {activeTab === "progress" && (
                       <ProgressVisualization 
                         data={sheet1Data} 
+                        projectId={selectedProject ? parseInt(selectedProject) : undefined}
+                      />
+                    )}
+
+                    {activeTab === "report-history" && (
+                      <ReportHistory 
                         projectId={selectedProject ? parseInt(selectedProject) : undefined}
                       />
                     )}
