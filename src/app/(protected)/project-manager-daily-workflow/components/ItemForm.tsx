@@ -76,7 +76,7 @@ const ItemForm = ({
               .max(
                 remainingInstall,
                 `Installed yesterday + current installed cannot exceed total (${remainingInstall} remaining)`,
-              ),
+    ),
           ],
         ];
       }),

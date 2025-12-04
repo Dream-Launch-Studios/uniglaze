@@ -463,12 +463,12 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
                         return null;
                       }
                       return (
-                        <Image
-                          key={phidx}
+                      <Image
+                        key={phidx}
                           src={imageUrl}
-                          style={styles.photo}
+                        style={styles.photo}
                           cache={false}
-                        />
+                      />
                       );
                     })}
                     <Text style={styles.photoDescription}>
@@ -908,12 +908,12 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
                         return null;
                       }
                       return (
-                        <Image
-                          key={phidx}
+                      <Image
+                        key={phidx}
                           src={imageUrl}
-                          style={styles.photo}
+                        style={styles.photo}
                           cache={false}
-                        />
+                      />
                       );
                     })}
                     <Text style={styles.photoDescription}>

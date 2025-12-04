@@ -386,4 +386,79 @@ export const projectRouter = createTRPCRouter({
         };
       }
     }),
+
+  getProjectVersionsHistory: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.number(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      try {
+        const where: any = {
+          projectId: input.projectId,
+        };
+
+        // Fetch a wider range to ensure we get all relevant versions
+        // We'll filter by actual report date in the component
+        if (input.startDate || input.endDate) {
+          // Fetch versions where either date field might be in range
+          // We'll do precise filtering in the component
+          const startDate = input.startDate ? new Date(input.startDate) : undefined;
+          const endDate = input.endDate ? new Date(input.endDate) : undefined;
+          
+          // If we have dates, expand the range slightly to catch edge cases
+          if (startDate) {
+            startDate.setHours(0, 0, 0, 0);
+            startDate.setDate(startDate.getDate() - 1); // Include day before
+          }
+          if (endDate) {
+            endDate.setHours(23, 59, 59, 999);
+            endDate.setDate(endDate.getDate() + 1); // Include day after
+          }
+          
+          where.OR = [
+            {
+              projectVersionCreatedAt: {
+                ...(startDate && { gte: startDate }),
+                ...(endDate && { lte: endDate }),
+              },
+            },
+            {
+              yesterdayReportCreatedAt: {
+                ...(startDate && { gte: startDate }),
+                ...(endDate && { lte: endDate }),
+              },
+            },
+          ];
+        }
+
+        const versions = await ctx.db.projectVersion.findMany({
+          where,
+          orderBy: { projectVersionCreatedAt: "asc" },
+          select: {
+            id: true,
+            projectVersionCreatedAt: true,
+            yesterdayReportCreatedAt: true,
+            sheet1: true,
+          },
+        });
+
+        return {
+          success: true,
+          data: versions,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to fetch project versions",
+          data: [],
+        };
+      }
+    }),
 });

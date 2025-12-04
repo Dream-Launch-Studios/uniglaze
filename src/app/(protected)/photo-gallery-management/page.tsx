@@ -203,22 +203,22 @@ const PhotoGalleryManagement: React.FC = () => {
         return true;
       })
       ?.flatMap(
-        (project, index1) =>
-          project.latestProjectVersion?.sheet1
-            ?.filter(
-              (item) => !!item?.yesterdayProgressPhotos?.[0]?.photos[0]?.url,
-            )
-            .flatMap((item, index2) =>
-              (item.yesterdayProgressPhotos ?? []).map((photo, index3) => ({
-                id: `${index1}-${index2}-${index3}` || "",
-                projectId: project.latestProjectVersion?.projectId ?? index1,
-                thumbnail: photo?.photos[0]?.url ?? "",
-                description: photo?.description ?? "",
-                workItem: item.itemName ?? "",
-                uploadedBy: project?.assignedProjectManager?.name ?? "",
-              })),
-            ) ?? [],
-      ) ?? [];
+      (project, index1) =>
+        project.latestProjectVersion?.sheet1
+          ?.filter(
+            (item) => !!item?.yesterdayProgressPhotos?.[0]?.photos[0]?.url,
+          )
+          .flatMap((item, index2) =>
+            (item.yesterdayProgressPhotos ?? []).map((photo, index3) => ({
+              id: `${index1}-${index2}-${index3}` || "",
+              projectId: project.latestProjectVersion?.projectId ?? index1,
+              thumbnail: photo?.photos[0]?.url ?? "",
+              description: photo?.description ?? "",
+              workItem: item.itemName ?? "",
+              uploadedBy: project?.assignedProjectManager?.name ?? "",
+            })),
+          ) ?? [],
+    ) ?? [];
 
   // console.log("MOCK PHOTOS", mockPhotos);
 

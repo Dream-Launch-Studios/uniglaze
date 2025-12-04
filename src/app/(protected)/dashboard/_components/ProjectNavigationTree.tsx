@@ -103,17 +103,17 @@ const ProjectNavigationTree: React.FC<ProjectNavigationTreeProps> = ({
           className="mb-4"
         />
         {userRole !== Role.PROJECT_MANAGER && (
-          <Button
-            variant="default"
-            size="sm"
-            iconName="Plus"
-            iconPosition="left"
-            iconSize={16}
-            onClick={() => router.push("/project-creation")}
-            className="w-full"
-          >
-            Create New Project
-          </Button>
+        <Button
+          variant="default"
+          size="sm"
+          iconName="Plus"
+          iconPosition="left"
+          iconSize={16}
+          onClick={() => router.push("/project-creation")}
+          className="w-full"
+        >
+          Create New Project
+        </Button>
         )}
       </div>
 

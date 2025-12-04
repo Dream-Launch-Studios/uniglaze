@@ -842,7 +842,10 @@ const ProjectManagementDashboard: React.FC = () => {
                     )}
 
                     {activeTab === "progress" && (
-                      <ProgressVisualization data={sheet1Data} />
+                      <ProgressVisualization 
+                        data={sheet1Data} 
+                        projectId={selectedProject ? parseInt(selectedProject) : undefined}
+                      />
                     )}
                   </div>
                 </div>

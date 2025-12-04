@@ -16,6 +16,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { api } from "@/trpc/react";
+import { Role } from "@prisma/client";
+import type { Session } from "@/server/auth";
+import { useSession } from "@/lib/auth-client";
 
 interface MasterDataRow {
   id: string | number;
@@ -33,6 +37,7 @@ interface MasterDataRow {
 
 interface ProgressVisualizationProps {
   data?: MasterDataRow[];
+  projectId?: number;
 }
 
 type ChartType = "bar" | "line";
@@ -50,7 +55,15 @@ interface ChartDataPoint {
 
 const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
   data,
+  projectId,
 }) => {
+  const { data: session } = useSession() as {
+    data: Session | null;
+    isPending: boolean;
+  };
+  const userRole = session?.user?.customRole;
+  const canEdit = userRole === Role.HEAD_OF_PLANNING || userRole === Role.MANAGING_DIRECTOR;
+
   const [chartType, setChartType] = useState<ChartType>("bar");
   const [selectedItemId, setSelectedItemId] = useState<string | number>("all");
   const [dateRange, setDateRange] = useState<DateRange>("all");
@@ -58,6 +71,50 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [selectedParameters, setSelectedParameters] = useState<Set<Parameter>>(
     new Set(["supplied", "installed"])
+  );
+
+  // Calculate date range for preset options
+  const dateRangeParams = useMemo(() => {
+    if (!projectId) return { projectId: 0, startDate: undefined, endDate: undefined };
+    
+    if (dateRange === "custom") {
+      return {
+        projectId,
+        startDate: customStartDate ? new Date(customStartDate) : undefined,
+        endDate: customEndDate ? new Date(customEndDate) : undefined,
+      };
+    }
+    
+    if (dateRange === "all") {
+      return { projectId, startDate: undefined, endDate: undefined };
+    }
+    
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (dateRange) {
+      case "7d":
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "30d":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "90d":
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return { projectId, startDate: undefined, endDate: undefined };
+    }
+    
+    return { projectId, startDate, endDate: now };
+  }, [projectId, dateRange, customStartDate, customEndDate]);
+
+  // Fetch historical data when date range is selected (only for HOP/MD)
+  const { data: historicalData } = api.project.getProjectVersionsHistory.useQuery(
+    dateRangeParams,
+    {
+      enabled: !!projectId && canEdit && dateRange !== "all" && (dateRange !== "custom" || (!!customStartDate && !!customEndDate)),
+    }
   );
 
   // Get selected item
@@ -68,6 +125,128 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
 
   // Generate chart data based on selections
   const chartData = useMemo((): ChartDataPoint[] => {
+    // If date range is selected (not "all") and we have historical data, use it
+    if (dateRange !== "all" && historicalData?.data && historicalData.data.length > 0) {
+      const versions = historicalData.data;
+      const result: ChartDataPoint[] = [];
+
+      // Get date range for filtering
+      let startDateFilter: Date | undefined;
+      let endDateFilter: Date | undefined;
+      
+      if (dateRange === "custom" && customStartDate && customEndDate) {
+        startDateFilter = new Date(customStartDate);
+        endDateFilter = new Date(customEndDate);
+        // Set to end of day for endDate
+        if (endDateFilter) {
+          endDateFilter.setHours(23, 59, 59, 999);
+        }
+      } else {
+        const now = new Date();
+        switch (dateRange) {
+          case "7d":
+            startDateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case "30d":
+            startDateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          case "90d":
+            startDateFilter = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+            break;
+        }
+        endDateFilter = now;
+      }
+
+      // Sort versions by actual report date first
+      const sortedVersions = [...versions].sort((a, b) => {
+        const dateA = a.yesterdayReportCreatedAt 
+          ? new Date(a.yesterdayReportCreatedAt)
+          : new Date(a.projectVersionCreatedAt);
+        const dateB = b.yesterdayReportCreatedAt 
+          ? new Date(b.yesterdayReportCreatedAt)
+          : new Date(b.projectVersionCreatedAt);
+        return dateA.getTime() - dateB.getTime();
+      });
+
+      sortedVersions.forEach((version) => {
+        const sheet1 = version.sheet1 as Array<{
+          itemName: string;
+          totalQuantity: number;
+          totalSupplied: number;
+          totalInstalled: number;
+          percentSupplied: number;
+          percentInstalled: number;
+          sheet2?: Array<{
+            subItemName: string;
+            totalQuantity: number;
+            totalSupplied: number;
+            totalInstalled: number;
+            percentSupplied: number;
+            percentInstalled: number;
+            connectWithSheet1Item: boolean;
+          }>;
+        }>;
+
+        if (!sheet1 || sheet1.length === 0) return;
+
+        // Use yesterdayReportCreatedAt if available (actual report date), otherwise use projectVersionCreatedAt
+        const versionDate = version.yesterdayReportCreatedAt 
+          ? new Date(version.yesterdayReportCreatedAt)
+          : new Date(version.projectVersionCreatedAt);
+        
+        // Filter by actual report date
+        if (startDateFilter && versionDate < startDateFilter) return;
+        if (endDateFilter && versionDate > endDateFilter) return;
+        
+        const date = versionDate.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+        });
+
+        if (selectedItemId === "all") {
+          // Aggregate all items
+          const aggregated = sheet1.reduce(
+            (acc, item) => ({
+              supplied: acc.supplied + item.totalSupplied,
+              installed: acc.installed + item.totalInstalled,
+              quantity: acc.quantity + item.totalQuantity,
+            }),
+            { supplied: 0, installed: 0, quantity: 0 }
+          );
+
+          const avgSupplyProgress =
+            sheet1.reduce((sum, item) => sum + item.percentSupplied, 0) / sheet1.length;
+          const avgInstallProgress =
+            sheet1.reduce((sum, item) => sum + item.percentInstalled, 0) / sheet1.length;
+
+          result.push({
+            date,
+            supplied: aggregated.supplied ?? 0,
+            installed: aggregated.installed ?? 0,
+            net: (aggregated.supplied ?? 0) - (aggregated.installed ?? 0),
+            supplyProgress: avgSupplyProgress ?? 0,
+            installProgress: avgInstallProgress ?? 0,
+          });
+        } else {
+          // Single item selected
+          const item = sheet1.find((item, idx) => idx === selectedItemId);
+          if (item) {
+            result.push({
+              date,
+              supplied: item.totalSupplied ?? 0,
+              installed: item.totalInstalled ?? 0,
+              net: (item.totalSupplied ?? 0) - (item.totalInstalled ?? 0),
+              supplyProgress: item.percentSupplied ?? 0,
+              installProgress: item.percentInstalled ?? 0,
+            });
+          }
+        }
+      });
+
+      return result;
+    }
+
+    // Fallback to current data (non-historical view)
     if (!data || data.length === 0) return [];
 
     // If "all items" is selected, aggregate data
@@ -84,11 +263,11 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
       return [
         {
           date: "Current",
-          supplied: aggregated.supplied,
-          installed: aggregated.installed,
-          net: aggregated.supplied - aggregated.installed,
-          supplyProgress: data.reduce((sum, item) => sum + item.supplyProgress, 0) / data.length,
-          installProgress: data.reduce((sum, item) => sum + item.installProgress, 0) / data.length,
+          supplied: aggregated.supplied ?? 0,
+          installed: aggregated.installed ?? 0,
+          net: (aggregated.supplied ?? 0) - (aggregated.installed ?? 0),
+          supplyProgress: data.length > 0 ? data.reduce((sum, item) => sum + (item.supplyProgress ?? 0), 0) / data.length : 0,
+          installProgress: data.length > 0 ? data.reduce((sum, item) => sum + (item.installProgress ?? 0), 0) / data.length : 0,
         },
       ];
     }
@@ -99,26 +278,22 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
       return [
         {
           date: "Current",
-          supplied: item.supplied,
-          installed: item.installed,
-          net: item.supplied - item.installed,
-          supplyProgress: item.supplyProgress,
-          installProgress: item.installProgress,
+          supplied: item.supplied ?? 0,
+          installed: item.installed ?? 0,
+          net: (item.supplied ?? 0) - (item.installed ?? 0),
+          supplyProgress: item.supplyProgress ?? 0,
+          installProgress: item.installProgress ?? 0,
         },
       ];
     }
 
     return [];
-  }, [data, selectedItemId, selectedItem]);
+  }, [data, selectedItemId, selectedItem, dateRange, historicalData, customStartDate, customEndDate]);
 
-  // Filter data by date range (for future use with historical data)
+  // Filter data by date range - data is already filtered by the query
   const filteredChartData = useMemo(() => {
-    if (dateRange === "custom" && customStartDate && customEndDate) {
-      // Filter by custom date range when historical data is available
-      return chartData;
-    }
     return chartData;
-  }, [chartData, dateRange, customStartDate, customEndDate]);
+  }, [chartData]);
 
   const handleParameterToggle = (param: Parameter) => {
     setSelectedParameters((prev) => {
@@ -134,13 +309,13 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
 
   const getParameterColor = (param: Parameter): string => {
     const colors: Record<Parameter, string> = {
-      supplied: "var(--color-primary)",
-      installed: "var(--color-primary)",
-      net: "var(--color-primary)",
-      supplyProgress: "var(--color-primary)",
-      installProgress: "var(--color-primary)",
+      supplied: "#3b82f6", // Blue
+      installed: "#10b981", // Green
+      net: "#f59e0b", // Amber
+      supplyProgress: "#8b5cf6", // Purple
+      installProgress: "#ef4444", // Red
     };
-    return colors[param] ?? "var(--color-primary)";
+    return colors[param] ?? "#3b82f6";
   };
 
   const getParameterName = (param: Parameter): string => {
@@ -231,13 +406,13 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                 <SelectItem value="30d">Last 30 Days</SelectItem>
                 <SelectItem value="90d">Last 90 Days</SelectItem>
                 <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="custom">Custom Range</SelectItem>
+                {canEdit && <SelectItem value="custom">Custom Range</SelectItem>}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Custom Date Range Inputs */}
-          {dateRange === "custom" && (
+          {/* Custom Date Range Inputs - Only for HOP/MD */}
+          {dateRange === "custom" && canEdit && (
             <>
               <div className="space-y-2">
                 <Label className="text-text-secondary text-sm font-medium">
@@ -346,6 +521,7 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                 <BarChart
                   data={filteredChartData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                  barCategoryGap="20%"
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -355,9 +531,9 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                     dataKey="date"
                     tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
                     axisLine={{ stroke: "var(--color-border)" }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
+                    angle={chartData.length > 5 ? -45 : 0}
+                    textAnchor={chartData.length > 5 ? "end" : "middle"}
+                    height={chartData.length > 5 ? 80 : 40}
                   />
                   <YAxis
                     tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
@@ -368,7 +544,7 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                   {selectedParameters.has("supplied") && (
                     <Bar
                       dataKey="supplied"
-                      fill="var(--color-primary)"
+                      fill={getParameterColor("supplied")}
                       name="Supplied"
                       radius={[4, 4, 0, 0]}
                     />
@@ -376,37 +552,33 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                   {selectedParameters.has("installed") && (
                     <Bar
                       dataKey="installed"
-                      fill="var(--color-primary)"
+                      fill={getParameterColor("installed")}
                       name="Installed"
                       radius={[4, 4, 0, 0]}
-                      opacity={0.8}
                     />
                   )}
                   {selectedParameters.has("net") && (
                     <Bar
                       dataKey="net"
-                      fill="var(--color-primary)"
+                      fill={getParameterColor("net")}
                       name="Net (Supplied - Installed)"
                       radius={[4, 4, 0, 0]}
-                      opacity={0.6}
                     />
                   )}
                   {selectedParameters.has("supplyProgress") && (
                     <Bar
                       dataKey="supplyProgress"
-                      fill="var(--color-primary)"
+                      fill={getParameterColor("supplyProgress")}
                       name="Supply Progress %"
                       radius={[4, 4, 0, 0]}
-                      opacity={0.7}
                     />
                   )}
                   {selectedParameters.has("installProgress") && (
                     <Bar
                       dataKey="installProgress"
-                      fill="var(--color-primary)"
+                      fill={getParameterColor("installProgress")}
                       name="Install Progress %"
                       radius={[4, 4, 0, 0]}
-                      opacity={0.5}
                     />
                   )}
                 </BarChart>
@@ -423,9 +595,9 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                     dataKey="date"
                     tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
                     axisLine={{ stroke: "var(--color-border)" }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
+                    angle={chartData.length > 5 ? -45 : 0}
+                    textAnchor={chartData.length > 5 ? "end" : "middle"}
+                    height={chartData.length > 5 ? 80 : 40}
                   />
                   <YAxis
                     tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
@@ -437,20 +609,20 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                     <Line
                       type="monotone"
                       dataKey="supplied"
-                      stroke="var(--color-primary)"
+                      stroke={getParameterColor("supplied")}
                       name="Supplied"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
+                      dot={{ r: 4, fill: getParameterColor("supplied") }}
                     />
                   )}
                   {selectedParameters.has("installed") && (
                     <Line
                       type="monotone"
                       dataKey="installed"
-                      stroke="var(--color-primary)"
+                      stroke={getParameterColor("installed")}
                       name="Installed"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
+                      dot={{ r: 4, fill: getParameterColor("installed") }}
                       strokeDasharray="5 5"
                     />
                   )}
@@ -458,10 +630,10 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                     <Line
                       type="monotone"
                       dataKey="net"
-                      stroke="var(--color-primary)"
+                      stroke={getParameterColor("net")}
                       name="Net (Supplied - Installed)"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
+                      dot={{ r: 4, fill: getParameterColor("net") }}
                       strokeDasharray="3 3"
                     />
                   )}
@@ -469,22 +641,20 @@ const ProgressVisualization: React.FC<ProgressVisualizationProps> = ({
                     <Line
                       type="monotone"
                       dataKey="supplyProgress"
-                      stroke="var(--color-primary)"
+                      stroke={getParameterColor("supplyProgress")}
                       name="Supply Progress %"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
-                      opacity={0.7}
+                      dot={{ r: 4, fill: getParameterColor("supplyProgress") }}
                     />
                   )}
                   {selectedParameters.has("installProgress") && (
                     <Line
                       type="monotone"
                       dataKey="installProgress"
-                      stroke="var(--color-primary)"
+                      stroke={getParameterColor("installProgress")}
                       name="Install Progress %"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
-                      opacity={0.5}
+                      dot={{ r: 4, fill: getParameterColor("installProgress") }}
                     />
                   )}
                 </LineChart>
