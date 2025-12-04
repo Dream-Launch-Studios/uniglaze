@@ -133,10 +133,10 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
         yetToSupply: sheet1?.[selectedItem]?.yetToSupply ?? 0,
         yetToInstall: sheet1?.[selectedItem]?.yetToInstall ?? 0,
         percentSupplied: +(
-          subTaskToAdd.totalSupplied / subTaskToAdd.totalQuantity
+          (subTaskToAdd.totalSupplied / subTaskToAdd.totalQuantity) * 100
         ).toFixed(2),
         percentInstalled: +(
-          subTaskToAdd.totalInstalled / subTaskToAdd.totalQuantity
+          (subTaskToAdd.totalInstalled / subTaskToAdd.totalQuantity) * 100
         ).toFixed(2),
         totalQuantity: subTaskToAdd.totalQuantity ?? 0,
         totalSupplied: subTaskToAdd.totalSupplied ?? 0,
@@ -149,10 +149,10 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
     pushToSheet2(selectedItem, {
       ...subTaskToAdd,
       percentSupplied: +(
-        subTaskToAdd.totalSupplied / subTaskToAdd.totalQuantity
+        (subTaskToAdd.totalSupplied / subTaskToAdd.totalQuantity) * 100
       ).toFixed(2),
       percentInstalled: +(
-        subTaskToAdd.totalInstalled / subTaskToAdd.totalQuantity
+        (subTaskToAdd.totalInstalled / subTaskToAdd.totalQuantity) * 100
       ).toFixed(2),
     });
 
@@ -232,10 +232,10 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
     editSheet2Item(selectedItem, editingIndex, {
       ...updatedSubTask,
       percentSupplied: +(
-        updatedSubTask.totalSupplied / updatedSubTask.totalQuantity
+        (updatedSubTask.totalSupplied / updatedSubTask.totalQuantity) * 100
       ).toFixed(2),
       percentInstalled: +(
-        updatedSubTask.totalInstalled / updatedSubTask.totalQuantity
+        (updatedSubTask.totalInstalled / updatedSubTask.totalQuantity) * 100
       ).toFixed(2),
     });
 
@@ -248,10 +248,10 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
         yetToSupply: sheet1?.[selectedItem]?.yetToSupply ?? 0,
         yetToInstall: sheet1?.[selectedItem]?.yetToInstall ?? 0,
         percentSupplied: +(
-          updatedSubTask.totalSupplied / updatedSubTask.totalQuantity
+          (updatedSubTask.totalSupplied / updatedSubTask.totalQuantity) * 100
         ).toFixed(2),
         percentInstalled: +(
-          updatedSubTask.totalInstalled / updatedSubTask.totalQuantity
+          (updatedSubTask.totalInstalled / updatedSubTask.totalQuantity) * 100
         ).toFixed(2),
         totalQuantity: updatedSubTask.totalQuantity ?? 0,
         totalSupplied: updatedSubTask.totalSupplied ?? 0,
@@ -347,10 +347,10 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       pushToSheet2(selectedItem, {
         ...subTask,
         percentSupplied: +(
-          subTask.totalSupplied / subTask.totalQuantity
+          (subTask.totalSupplied / subTask.totalQuantity) * 100
         ).toFixed(2),
         percentInstalled: +(
-          subTask.totalInstalled / subTask.totalQuantity
+          (subTask.totalInstalled / subTask.totalQuantity) * 100
         ).toFixed(2),
       });
     });
