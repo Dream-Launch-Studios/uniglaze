@@ -39,6 +39,12 @@ interface Project {
   dueDate: string;
   // teamSize: number;
   daysRemaining: number;
+  projectDocuments: {
+    s3Key: string;
+    fileName: string;
+    fileType: string;
+    url: string;
+  }[];
 }
 
 interface ProjectWithId extends Project {
@@ -215,6 +221,8 @@ const Dashboard: React.FC = () => {
         daysRemaining: safeDateDiff(
           project.latestProjectVersion?.estimatedEndDate,
         ),
+        projectDocuments:
+          project.latestProjectVersion?.projectDocuments ?? [],
         // @ts-expect-error
         assignedPM: project!.latestProjectVersion!.assignedProjectManager!.name,
       })) ?? []
