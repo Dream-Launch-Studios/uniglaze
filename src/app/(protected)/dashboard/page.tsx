@@ -39,6 +39,7 @@ interface Project {
   dueDate: string;
   // teamSize: number;
   daysRemaining: number;
+  msTeamsLink?: string;
   projectDocuments: {
     s3Key: string;
     fileName: string;
@@ -221,6 +222,7 @@ const Dashboard: React.FC = () => {
         daysRemaining: safeDateDiff(
           project.latestProjectVersion?.estimatedEndDate,
         ),
+        msTeamsLink: project.latestProjectVersion?.msTeamsLink,
         projectDocuments:
           project.latestProjectVersion?.projectDocuments ?? [],
         // @ts-expect-error

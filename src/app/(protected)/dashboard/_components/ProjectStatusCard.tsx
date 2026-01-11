@@ -29,6 +29,7 @@ interface Project {
   dueDate: string;
   // teamSize: number;
   daysRemaining: number;
+  msTeamsLink?: string;
   projectDocuments: {
     s3Key: string;
     fileName: string;
@@ -181,6 +182,23 @@ const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({ project, onClick,
               ? `${project.daysRemaining} days left`
               : `${Math.abs(project.daysRemaining)} days overdue`}
           </span>
+
+          {project.msTeamsLink && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary hover:bg-primary/5"
+              onClick={(event) => {
+                event.stopPropagation();
+                window.open(project.msTeamsLink, "_blank");
+              }}
+            >
+              <Icon name="MessageSquare" size={14} />
+              <span className="ml-1 text-xs font-medium">
+                Microsoft Teams
+              </span>
+            </Button>
+          )}
 
           {hasResources && (
             <AlertDialog
