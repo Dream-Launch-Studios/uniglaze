@@ -63,16 +63,16 @@ interface BlockageCardData {
   title: string;
   description: string;
   project: string;
-  // location: string; //
   severity: "critical" | "high" | "medium" | "low";
   category: "client" | "internal" | "supplier" | "weather";
-  // status: "open" | "in-progress" | "pending-approval" | "resolved" | "closed"; //
+  status?: "OPEN" | "CLOSED";
   createdAt: string;
-  // clientVisible: boolean; //
   assignedTo: string;
   priority: boolean;
-  // commentsCount?: number; //
   photos?: BlockagePhoto[];
+  closureDate?: string;
+  closureRemarks?: string;
+  closedByName?: string;
 }
 
 // interface BlockageModalData {
@@ -540,7 +540,7 @@ const BlockageManagement: React.FC = () => {
     if (!selectedBlockageForClose || !session?.user?.id) return;
 
     try {
-      // Find the project in the store
+      // Find the project from API data
       const project = projects?.data?.find(
         (p) =>
           p.latestProjectVersion.projectId ===
@@ -560,12 +560,27 @@ const BlockageManagement: React.FC = () => {
         session.user.id,
       );
 
-      // Get updated project data
+      // Get updated project data from store
       const updatedProject = useProjectStore.getState().getProject();
 
-      // Save to database
+      // Use the full project data from API and merge with updated blockage
+      const projectVersion = project.latestProjectVersion;
+      
+      // Update the specific blockage in the project version
+      const sheet1Item = projectVersion.sheet1?.[selectedBlockageForClose.sheet1Index];
+      const blockage = sheet1Item?.blockages?.[selectedBlockageForClose.blockageIndex];
+      
+      if (sheet1Item && blockage) {
+        blockage.status = "CLOSED";
+        blockage.closureRemarks = closureRemarks;
+        blockage.closureDate = new Date();
+        blockage.closedByUserId = session.user.id;
+        blockage.blockageEndTime = new Date();
+      }
+
+      // Save to database using the full project version data
       await updateProjectVersion({
-        ...updatedProject.latestProjectVersion,
+        ...projectVersion,
         projectId: selectedBlockageForClose.projectId,
       });
 

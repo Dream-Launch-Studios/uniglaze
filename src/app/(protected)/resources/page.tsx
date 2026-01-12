@@ -6,7 +6,7 @@ import { Role } from "@prisma/client";
 import type { Session } from "@/server/auth";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
-import Icon from "@/components/rocket/components/AppIcon";
+import Icon, { type IconName } from "@/components/rocket/components/AppIcon";
 import Button from "@/components/rocket/components/ui/Button";
 import Header from "@/components/rocket/components/ui/Header";
 import Sidebar from "@/components/rocket/components/ui/Sidebar";
@@ -163,7 +163,7 @@ const Resources: React.FC = () => {
     return filtered;
   }, [allDocuments, selectedProject, searchQuery, filterType]);
 
-  const getFileIconName = (fileName: string): string => {
+  const getFileIconName = (fileName: string): IconName => {
     const extension = fileName.split(".").pop()?.toLowerCase() ?? "";
     if (["pdf", "doc", "docx", "xls", "xlsx"].includes(extension)) {
       return "FileText";

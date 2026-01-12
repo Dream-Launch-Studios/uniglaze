@@ -92,8 +92,8 @@ const MasterDataTable: React.FC<MasterDataTableProps> = ({
 
       // Handle undefined values
       if (aValue === undefined && bValue === undefined) return 0;
-      if (aValue === undefined) return sortConfig.direction === "asc" ? 1 : -1;
-      if (bValue === undefined) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue === undefined || aValue === null) return sortConfig.direction === "asc" ? 1 : -1;
+      if (bValue === undefined || bValue === null) return sortConfig.direction === "asc" ? -1 : 1;
 
       if (aValue < bValue) {
         return sortConfig.direction === "asc" ? -1 : 1;
