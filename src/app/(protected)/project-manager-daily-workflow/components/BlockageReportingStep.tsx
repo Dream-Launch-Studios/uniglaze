@@ -58,6 +58,7 @@ const BlockageReportingStep = ({
       category: "",
       description: "",
       severity: "MEDIUM",
+      status: "OPEN",
       weatherReport: "",
       openDate: new Date(),
       // estimatedCloseDate: new Date(),
@@ -71,6 +72,8 @@ const BlockageReportingStep = ({
       category: "",
       description: "",
       severity: "MEDIUM",
+      status: "OPEN",
+      weatherReport: "",
       openDate: new Date(),
       // estimatedCloseDate: new Date(),
       photos: [],
@@ -131,7 +134,7 @@ const BlockageReportingStep = ({
         type: values.type,
         category: values.category,
         severity: values.severity,
-        status: "PENDING",
+        status: "OPEN",
         description: values.description,
         weatherReport: values.weatherReport,
         manPower: 0,
@@ -750,14 +753,14 @@ const BlockageReportingStep = ({
       )}
 
       {/* Existing Blockages */}
-      {blockages?.filter((blockage) => blockage.status === "PENDING").length &&
-      blockages?.filter((blockage) => blockage.status === "PENDING").length >
+      {blockages?.filter((blockage) => blockage.status === "OPEN").length &&
+      blockages?.filter((blockage) => blockage.status === "OPEN").length >
         0 ? (
         <div className="bg-surface border-border mb-6 rounded-lg border p-6">
           <h3 className="text-text-primary mb-4 text-lg font-semibold">
             Reported Blockages (
             {
-              blockages?.filter((blockage) => blockage.status === "PENDING")
+              blockages?.filter((blockage) => blockage.status === "OPEN")
                 .length
             }
             )
@@ -769,7 +772,7 @@ const BlockageReportingStep = ({
                 key={index}
                 className={cn(
                   "border-border rounded-lg border p-4",
-                  blockage.status === "RESOLVED" && "hidden",
+                  blockage.status === "CLOSED" && "hidden",
                 )}
               >
                 <div className="mb-3 flex items-start justify-between">
@@ -864,7 +867,7 @@ const BlockageReportingStep = ({
       )}
 
       {/* No Blockages Message */}
-      {blockages?.filter((blockage) => blockage.status === "PENDING").length ===
+      {blockages?.filter((blockage) => blockage.status === "OPEN").length ===
         0 &&
         !isAddingBlockage && (
           <div className="py-8 text-center">

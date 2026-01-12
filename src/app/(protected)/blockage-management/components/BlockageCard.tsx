@@ -13,16 +13,16 @@ interface Blockage {
   title: string;
   description: string;
   project: string;
-  // location: string; //
   severity: "critical" | "high" | "medium" | "low";
   category: "client" | "internal" | "supplier" | "weather";
-  // status: "open" | "in-progress" | "pending-approval" | "resolved" | "closed"; //
+  status?: "OPEN" | "CLOSED";
   createdAt: string;
-  // clientVisible: boolean; //
   assignedTo: string;
   priority: boolean;
-  // commentsCount?: number; //
   photos?: BlockagePhoto[];
+  closureDate?: string;
+  closureRemarks?: string;
+  closedByName?: string;
 }
 
 interface BlockageCardProps {
@@ -30,6 +30,7 @@ interface BlockageCardProps {
   onViewDetails: (blockage: Blockage) => void;
   onStatusChange: (id: string | number, status: string) => void;
   onEdit: (blockage: Blockage) => void;
+  onClose?: () => void;
 }
 
 const BlockageCard: React.FC<BlockageCardProps> = ({
@@ -37,6 +38,7 @@ const BlockageCard: React.FC<BlockageCardProps> = ({
   onViewDetails,
   onStatusChange,
   onEdit,
+  onClose,
 }) => {
   const getSeverityColor = (severity: Blockage["severity"]): string => {
     switch (severity) {
@@ -53,22 +55,16 @@ const BlockageCard: React.FC<BlockageCardProps> = ({
     }
   };
 
-  // const getStatusColor = (status: Blockage["status"]): string => {
-  //   switch (status) {
-  //     case "open":
-  //       return "text-error bg-error/10";
-  //     case "in-progress":
-  //       return "text-accent bg-accent/10";
-  //     case "pending-approval":
-  //       return "text-warning bg-warning/10";
-  //     case "resolved":
-  //       return "text-success bg-success/10";
-  //     case "closed":
-  //       return "text-text-secondary bg-muted";
-  //     default:
-  //       return "text-text-secondary bg-muted";
-  //   }
-  // };
+  const getStatusColor = (status?: "OPEN" | "CLOSED"): string => {
+    switch (status) {
+      case "OPEN":
+        return "text-error bg-error/10 border-error/20";
+      case "CLOSED":
+        return "text-success bg-success/10 border-success/20";
+      default:
+        return "text-text-secondary bg-muted border-border";
+    }
+  };
 
   const getCategoryIcon = (category: Blockage["category"]): IconName => {
     switch (category) {
@@ -164,21 +160,27 @@ const BlockageCard: React.FC<BlockageCardProps> = ({
       {/* Status and Metadata */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          {/* <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(blockage.status)}`}
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusColor(blockage.status)}`}
           >
-            {blockage.status
-              .replace("-", " ")
-              .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-          </span> */}
+            {blockage.status ?? "OPEN"}
+          </span>
           <div className="text-text-secondary flex items-center text-sm">
             <Icon name="Calendar" size={14} className="mr-1" />
             {formatDate(blockage.createdAt)}
           </div>
-          <div className="text-text-secondary flex items-center text-sm">
-            <Icon name="Clock" size={14} className="mr-1" />
-            {getDaysOutstanding(blockage.createdAt)} days
-          </div>
+          {blockage.status === "OPEN" && (
+            <div className="text-text-secondary flex items-center text-sm">
+              <Icon name="Clock" size={14} className="mr-1" />
+              {getDaysOutstanding(blockage.createdAt)} days
+            </div>
+          )}
+          {blockage.status === "CLOSED" && blockage.closureDate && (
+            <div className="text-text-secondary flex items-center text-sm">
+              <Icon name="CheckCircle" size={14} className="mr-1" />
+              Closed {formatDate(blockage.closureDate)}
+            </div>
+          )}
         </div>
 
         {/* {blockage.clientVisible && (
@@ -211,63 +213,43 @@ const BlockageCard: React.FC<BlockageCardProps> = ({
         )}
       </div>
 
-      {/* Actions */}
-      {/* <div className="border-border flex items-center justify-between border-t pt-4">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            iconName="Eye"
-            iconPosition="left"
-            iconSize={14}
-            onClick={() => onViewDetails(blockage)}
-          >
-            View Details
-          </Button>
-
-          {blockage.status !== "closed" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              iconName="MessageSquare"
-              iconSize={14}
-              onClick={() => onViewDetails(blockage)}
-            >
-              {blockage.commentsCount ?? 0}
-            </Button>
-          )}
-        </div>
-
-        {blockage.status !== "closed" && (
-          <div className="flex items-center space-x-2">
-            {blockage.status === "open" && (
-              <Button
-                variant="default"
-                size="sm"
-                iconName="Play"
-                iconPosition="left"
-                iconSize={14}
-                onClick={() => onStatusChange(blockage.id, "in-progress")}
-              >
-                Start Work
-              </Button>
-            )}
-
-            {blockage.status === "in-progress" && (
-              <Button
-                variant="success"
-                size="sm"
-                iconName="Check"
-                iconPosition="left"
-                iconSize={14}
-                onClick={() => onStatusChange(blockage.id, "resolved")}
-              >
-                Mark Resolved
-              </Button>
+      {/* Closure Information */}
+      {blockage.status === "CLOSED" && (
+        <div className="bg-muted border-border mb-4 rounded-lg border p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-text-secondary text-xs font-medium">
+              Closed by: {blockage.closedByName ?? "Unknown"}
+            </span>
+            {blockage.closureDate && (
+              <span className="text-text-secondary text-xs">
+                {formatDate(blockage.closureDate)}
+              </span>
             )}
           </div>
-        )}
-      </div> */}
+          {blockage.closureRemarks && (
+            <p className="text-text-primary text-sm">
+              {blockage.closureRemarks}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Actions */}
+      {blockage.status === "OPEN" && onClose && (
+        <div className="border-border flex items-center justify-end border-t pt-4">
+          <Button
+            variant="default"
+            size="sm"
+            iconName="XCircle"
+            iconPosition="left"
+            iconSize={14}
+            onClick={onClose}
+            className="bg-warning hover:bg-warning/90"
+          >
+            Close Blockage
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

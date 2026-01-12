@@ -101,6 +101,17 @@ const Sidebar: React.FC = () => {
       ],
       badge: null,
     },
+    {
+      label: "View Resources",
+      path: "/resources",
+      icon: "FolderOpen",
+      roles: [
+        Role.MANAGING_DIRECTOR,
+        Role.HEAD_OF_PLANNING,
+        Role.PROJECT_MANAGER,
+      ],
+      badge: null,
+    },
     // {
     //   label: "Archive",
     //   path: "/project-archive",

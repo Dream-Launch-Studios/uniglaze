@@ -617,11 +617,11 @@ const Dashboard: React.FC = () => {
       recentReportsAndBlockagesListOfProjectsOfManager.recentBlockagesInProjects.forEach(
         (project) => {
           project.blockages.forEach((blockage, index) => {
-            if (blockage && blockage.status === "PENDING") {
+            if (blockage && blockage.status === "OPEN") {
               notifications.push({
                 id: `blockage-${project.projectName}-${index}`,
                 type: "alert",
-                title: "Pending Blockage Reported",
+                title: "Open Blockage Reported",
                 message: `${blockage.description} (Status: ${blockage.status}, ${blockage.numberOfPhotos} photos attached)`,
                 priority: "high",
                 timestamp: new Date(blockage.openDate),
@@ -681,11 +681,11 @@ const Dashboard: React.FC = () => {
       recentReportsAndBlockagesList.recentBlockagesInProjects.forEach(
         (project) => {
           project.blockages.forEach((blockage, index) => {
-            if (blockage && blockage.status === "PENDING") {
+            if (blockage && blockage.status === "OPEN") {
               notifications.push({
                 id: `blockage-${project.projectName}-${index}`,
                 type: "alert",
-                title: "Pending Blockage Reported",
+                title: "Open Blockage Reported",
                 message: `${blockage.description} (Status: ${blockage.status}, ${blockage.numberOfPhotos} photos attached)`,
                 priority: "high",
                 timestamp: new Date(blockage.openDate),

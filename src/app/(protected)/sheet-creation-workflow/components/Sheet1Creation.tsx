@@ -34,12 +34,8 @@ const modifiedNewItemForm = newItemForm.extend({
     .number()
     .transform((val) => val ?? 0)
     .optional(),
-  actualStartDate: z.coerce.date().optional(),
-  actualEndDate: z.coerce.date().optional(),
-  plannedStartDate: z.coerce.date().optional(),
-  plannedEndDate: z.coerce.date().optional(),
-  revisedStartDate: z.coerce.date().optional(),
-  revisedEndDate: z.coerce.date().optional(),
+  supplyTargetDate: z.coerce.date().optional(),
+  installationTargetDate: z.coerce.date().optional(),
 });
 type NewItemForm = z.infer<typeof modifiedNewItemForm>;
 
@@ -55,7 +51,8 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
     totalQuantity: undefined,
     totalSupplied: undefined,
     totalInstalled: undefined,
-    actualStartDate: undefined,
+    supplyTargetDate: undefined,
+    installationTargetDate: undefined,
   });
   const [isAddingItem, setIsAddingItem] = useState<boolean>(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -169,6 +166,8 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
         newItem.totalInstalled ?? 0,
         newItem.totalQuantity ?? 0,
       ),
+      supplyTargetDate: newItem.supplyTargetDate,
+      installationTargetDate: newItem.installationTargetDate,
       sheet2: [],
       blockages: [],
       yesterdayProgressPhotos: [],
@@ -181,6 +180,8 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
       totalQuantity: undefined,
       totalSupplied: undefined,
       totalInstalled: undefined,
+      supplyTargetDate: undefined,
+      installationTargetDate: undefined,
     });
     setIsAddingItem(false);
   };
@@ -195,6 +196,8 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
       totalQuantity: item.totalQuantity ?? undefined,
       totalSupplied: item.totalSupplied ?? undefined,
       totalInstalled: item.totalInstalled ?? undefined,
+      supplyTargetDate: item.supplyTargetDate ? new Date(item.supplyTargetDate) : undefined,
+      installationTargetDate: item.installationTargetDate ? new Date(item.installationTargetDate) : undefined,
     });
     setEditingIndex(index);
     setIsAddingItem(true);
@@ -235,6 +238,8 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
         newItem.totalInstalled ?? 0,
         newItem.totalQuantity ?? 0,
       ),
+      supplyTargetDate: newItem.supplyTargetDate,
+      installationTargetDate: newItem.installationTargetDate,
     };
 
     editSheet1Item(editingIndex, itemToAdd);
@@ -244,6 +249,8 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
       totalQuantity: undefined,
       totalSupplied: undefined,
       totalInstalled: undefined,
+      supplyTargetDate: undefined,
+      installationTargetDate: undefined,
     });
     setEditingIndex(null);
     setIsAddingItem(false);
@@ -427,123 +434,35 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
 
             <div>
               <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Actual Start Date
+                Supply Target Date
               </label>
               <input
                 type="date"
-                value={newItem.actualStartDate?.toISOString().split("T")[0]}
+                value={newItem.supplyTargetDate?.toISOString().split("T")[0] ?? ""}
                 onChange={(e) =>
                   setNewItem((prev) => ({
                     ...prev,
-                    actualStartDate: new Date(e.target.value),
+                    supplyTargetDate: e.target.value ? new Date(e.target.value) : undefined,
                   }))
                 }
                 className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
-                placeholder="0"
-                min="0"
-                step="0.01"
-                readOnly={true}
               />
             </div>
 
             <div>
               <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Actual End Date
+                Installation Target Date
               </label>
               <input
                 type="date"
-                value={newItem.actualEndDate?.toISOString().split("T")[0]}
+                value={newItem.installationTargetDate?.toISOString().split("T")[0] ?? ""}
                 onChange={(e) =>
                   setNewItem((prev) => ({
                     ...prev,
-                    actualEndDate: new Date(e.target.value),
+                    installationTargetDate: e.target.value ? new Date(e.target.value) : undefined,
                   }))
                 }
                 className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
-                placeholder="0"
-                min="0"
-                step="0.01"
-                readOnly={true}
-              />
-            </div>
-
-            <div>
-              <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Planned Start Date
-              </label>
-              <input
-                type="date"
-                value={newItem.plannedStartDate?.toISOString().split("T")[0]}
-                onChange={(e) =>
-                  setNewItem((prev) => ({
-                    ...prev,
-                    plannedStartDate: new Date(e.target.value),
-                  }))
-                }
-                className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
-                placeholder="0"
-                min="0"
-                step="0.01"
-              />
-            </div>
-
-            <div>
-              <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Planned End Date
-              </label>
-              <input
-                type="date"
-                value={newItem.actualStartDate?.toISOString().split("T")[0]}
-                onChange={(e) =>
-                  setNewItem((prev) => ({
-                    ...prev,
-                    plannedEndDate: new Date(e.target.value),
-                  }))
-                }
-                className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
-                placeholder="0"
-                min="0"
-                step="0.01"
-              />
-            </div>
-
-            <div>
-              <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Revised Start Date
-              </label>
-              <input
-                type="date"
-                value={newItem.actualStartDate?.toISOString().split("T")[0]}
-                onChange={(e) =>
-                  setNewItem((prev) => ({
-                    ...prev,
-                    revisedStartDate: new Date(e.target.value),
-                  }))
-                }
-                className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
-                placeholder="0"
-                min="0"
-                step="0.01"
-              />
-            </div>
-
-            <div>
-              <label className="text-text-secondary mb-2 block text-sm font-medium">
-                Revised End Date
-              </label>
-              <input
-                type="date"
-                value={newItem.actualStartDate?.toISOString().split("T")[0]}
-                onChange={(e) =>
-                  setNewItem((prev) => ({
-                    ...prev,
-                    revisedEndDate: new Date(e.target.value),
-                  }))
-                }
-                className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
-                placeholder="0"
-                min="0"
-                step="0.01"
               />
             </div>
           </div>
@@ -630,6 +549,12 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
                     % Installed
                   </th>
                   <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                    Supply Target Date
+                  </th>
+                  <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                    Installation Target Date
+                  </th>
+                  <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
                     Actions
                   </th>
                 </tr>
@@ -686,6 +611,16 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
                       >
                         {item.percentInstalled}%
                       </span>
+                    </td>
+                    <td className="text-text-secondary px-4 py-3 text-sm">
+                      {item.supplyTargetDate
+                        ? new Date(item.supplyTargetDate).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="text-text-secondary px-4 py-3 text-sm">
+                      {item.installationTargetDate
+                        ? new Date(item.installationTargetDate).toLocaleDateString()
+                        : "N/A"}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex items-center space-x-2">

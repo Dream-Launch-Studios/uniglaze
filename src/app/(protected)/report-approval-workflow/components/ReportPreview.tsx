@@ -127,6 +127,23 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
     return total > 0 ? Math.round((cumulative / total) * 100) : 0;
   };
 
+  // Calculate remaining days from target date to report generation date
+  const calculateRemainingDays = (targetDate: string | Date | null | undefined): number => {
+    if (!targetDate) return 0;
+    const target = new Date(targetDate);
+    const reportDate = new Date(); // Report generation date
+    if (isNaN(target.getTime())) return 0;
+    const diffTime = target.getTime() - reportDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays); // Return 0 if target date is in the past
+  };
+
+  // Calculate per-day target (rounded to whole number)
+  const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
+    if (remainingDays <= 0) return 0;
+    return Math.round(balance / remainingDays);
+  };
+
   const handleSave = async (): Promise<void> => {
     setIsSaving(true);
     try {
@@ -382,38 +399,65 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
                   <TableHead>Total Installed</TableHead>
                   <TableHead>Yet to Supply</TableHead>
                   <TableHead>Yet to Install</TableHead>
+                  <TableHead>Supply Target</TableHead>
+                  <TableHead>Installation Target</TableHead>
+                  <TableHead>Per Day Supply Target</TableHead>
+                  <TableHead>Per Day Installation Target</TableHead>
                   <TableHead>% Supplied</TableHead>
                   <TableHead>% Installed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {project.latestProjectVersion?.sheet1?.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.itemName}</TableCell>
-                    <TableCell className="text-center">{item.unit}</TableCell>
-                    <TableCell className="text-center">
-                      {item.totalQuantity}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {item.totalSupplied}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {item.totalInstalled}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {item.yetToSupply}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {item.yetToInstall}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {Math.min(item.percentSupplied, 100)}%
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {Math.min(item.percentInstalled, 100)}%
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {project.latestProjectVersion?.sheet1?.map((item, index) => {
+                  const remainingDaysSupply = calculateRemainingDays(item.supplyTargetDate);
+                  const remainingDaysInstall = calculateRemainingDays(item.installationTargetDate);
+                  const perDaySupplyTarget = calculatePerDayTarget(item.yetToSupply, remainingDaysSupply);
+                  const perDayInstallTarget = calculatePerDayTarget(item.yetToInstall, remainingDaysInstall);
+
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>{item.itemName}</TableCell>
+                      <TableCell className="text-center">{item.unit}</TableCell>
+                      <TableCell className="text-center">
+                        {item.totalQuantity}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.totalSupplied}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.totalInstalled}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.yetToSupply}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.yetToInstall}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.supplyTargetDate
+                          ? formatDate(item.supplyTargetDate).split(",")[0]
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.installationTargetDate
+                          ? formatDate(item.installationTargetDate).split(",")[0]
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {perDaySupplyTarget > 0 ? perDaySupplyTarget : "N/A"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {perDayInstallTarget > 0 ? perDayInstallTarget : "N/A"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {Math.min(item.percentSupplied, 100)}%
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {Math.min(item.percentInstalled, 100)}%
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

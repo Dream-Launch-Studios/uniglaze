@@ -49,12 +49,23 @@ const styles = StyleSheet.create({
     borderBottomColor: "#000",
   },
   tableHeader: { backgroundColor: "#f0f0f0", fontWeight: "bold" },
-  tableCell: { flex: 1, padding: 4, fontSize: 10 },
-  headerCell: { flex: 1, padding: 4, fontSize: 10, fontWeight: "bold" },
+  tableCell: { padding: 3, fontSize: 8 },
+  headerCell: { padding: 3, fontSize: 8, fontWeight: "bold" },
+  // Column width styles for Sheet 1 (13 columns) - total must equal 100%
+  cellMainTask: { width: "9%", padding: 3, fontSize: 8 },
+  cellUnit: { width: "5%", padding: 3, fontSize: 8 },
+  cellNumber: { width: "7%", padding: 3, fontSize: 8 },
+  cellDate: { width: "8%", padding: 3, fontSize: 8 },
+  cellPercent: { width: "5%", padding: 3, fontSize: 8 },
+  headerMainTask: { width: "9%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerUnit: { width: "5%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerNumber: { width: "7%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerDate: { width: "8%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerPercent: { width: "5%", padding: 3, fontSize: 8, fontWeight: "bold" },
   page: {
     flexDirection: "column",
     backgroundColor: "#ffffff",
-    padding: 20,
+    padding: 15,
     fontFamily: "Helvetica",
   },
   header: {
@@ -252,9 +263,33 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
         ?.filter((blockage: BlockageItem) => blockage.type === "CLIENT")
         ?.filter((blockage: BlockageItem) => blockage.description !== ""),
   );
+
+  // Calculate remaining days and per-day targets
+  const calculateRemainingDays = (targetDate: string | Date | null | undefined): number => {
+    if (!targetDate) return 0;
+    const target = new Date(targetDate);
+    const reportDate = new Date();
+    if (isNaN(target.getTime())) return 0;
+    const diffTime = target.getTime() - reportDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
+    if (remainingDays <= 0) return 0;
+    return Math.round(balance / remainingDays);
+  };
+
+  const formatTargetDate = (date: string | Date | null | undefined): string => {
+    if (!date) return "N/A";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString();
+  };
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" orientation="landscape" style={styles.page}>
         {/* client information */}
         <View style={styles.header}>
           <Text style={styles.title}>{report.projectName}</Text>
@@ -280,33 +315,56 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
           <Text style={styles.sectionTitle}>Sheet 1</Text>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <Text style={styles.headerCell}>Main Task</Text>
-              <Text style={styles.headerCell}>Units</Text>
-              <Text style={styles.headerCell}>Total Qty</Text>
-              <Text style={styles.headerCell}>Total Supplied</Text>
-              <Text style={styles.headerCell}>Total Installed</Text>
-              <Text style={styles.headerCell}>Yet to Supply</Text>
-              <Text style={styles.headerCell}>Yet to Install</Text>
-              <Text style={styles.headerCell}>% Supplied</Text>
-              <Text style={styles.headerCell}>% Installed</Text>
+              <Text style={styles.headerMainTask}>Main Task</Text>
+              <Text style={styles.headerUnit}>Units</Text>
+              <Text style={styles.headerNumber}>Total Qty</Text>
+              <Text style={styles.headerNumber}>Supplied</Text>
+              <Text style={styles.headerNumber}>Installed</Text>
+              <Text style={styles.headerNumber}>Bal Supply</Text>
+              <Text style={styles.headerNumber}>Bal Install</Text>
+              <Text style={styles.headerDate}>Supply Target</Text>
+              <Text style={styles.headerDate}>Install Target</Text>
+              <Text style={styles.headerNumber}>Per Day Supply</Text>
+              <Text style={styles.headerNumber}>Per Day Install</Text>
+              <Text style={styles.headerPercent}>% Supp</Text>
+              <Text style={styles.headerPercent}>% Inst</Text>
             </View>
-            {latest?.sheet1?.map((item, idx) => (
-              <View style={styles.tableRow} key={idx}>
-                <Text style={styles.tableCell}>{item.itemName}</Text>
-                <Text style={styles.tableCell}>{item.unit}</Text>
-                <Text style={styles.tableCell}>{item.totalQuantity}</Text>
-                <Text style={styles.tableCell}>{item.totalSupplied}</Text>
-                <Text style={styles.tableCell}>{item.totalInstalled}</Text>
-                <Text style={styles.tableCell}>{item.yetToSupply}</Text>
-                <Text style={styles.tableCell}>{item.yetToInstall}</Text>
-                <Text style={styles.tableCell}>
-                  {Math.min(item.percentSupplied, 100)}%
-                </Text>
-                <Text style={styles.tableCell}>
-                  {Math.min(item.percentInstalled, 100)}%
-                </Text>
-              </View>
-            ))}
+            {latest?.sheet1?.map((item, idx) => {
+              const remainingDaysSupply = calculateRemainingDays(item.supplyTargetDate);
+              const remainingDaysInstall = calculateRemainingDays(item.installationTargetDate);
+              const perDaySupplyTarget = calculatePerDayTarget(item.yetToSupply, remainingDaysSupply);
+              const perDayInstallTarget = calculatePerDayTarget(item.yetToInstall, remainingDaysInstall);
+
+              return (
+                <View style={styles.tableRow} key={idx}>
+                  <Text style={styles.cellMainTask}>{item.itemName}</Text>
+                  <Text style={styles.cellUnit}>{item.unit}</Text>
+                  <Text style={styles.cellNumber}>{item.totalQuantity}</Text>
+                  <Text style={styles.cellNumber}>{item.totalSupplied}</Text>
+                  <Text style={styles.cellNumber}>{item.totalInstalled}</Text>
+                  <Text style={styles.cellNumber}>{item.yetToSupply}</Text>
+                  <Text style={styles.cellNumber}>{item.yetToInstall}</Text>
+                  <Text style={styles.cellDate}>
+                    {formatTargetDate(item.supplyTargetDate)}
+                  </Text>
+                  <Text style={styles.cellDate}>
+                    {formatTargetDate(item.installationTargetDate)}
+                  </Text>
+                  <Text style={styles.cellNumber}>
+                    {perDaySupplyTarget > 0 ? perDaySupplyTarget : "N/A"}
+                  </Text>
+                  <Text style={styles.cellNumber}>
+                    {perDayInstallTarget > 0 ? perDayInstallTarget : "N/A"}
+                  </Text>
+                  <Text style={styles.cellPercent}>
+                    {Math.min(item.percentSupplied, 100)}%
+                  </Text>
+                  <Text style={styles.cellPercent}>
+                    {Math.min(item.percentInstalled, 100)}%
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -681,15 +739,29 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
                   Weather Report: {blockage?.weatherReport}
                 </Text>
                 <Text style={styles.blockageDescription}>
-                  Reported on:{" "}
-                  {formatDate(blockage?.blockageStartTime ?? new Date())}
+                  Status: <Text style={styles.blockageType}>{blockage?.status ?? "OPEN"}</Text>
                 </Text>
                 <Text style={styles.blockageDescription}>
-                  Closed on:{" "}
-                  {blockage?.blockageEndTime
-                    ? formatDate(blockage.blockageEndTime)
-                    : "N/A"}
+                  Open Date:{" "}
+                  {formatDate(blockage?.blockageStartTime ?? new Date())}
                 </Text>
+                {blockage?.status === "CLOSED" && (
+                  <>
+                    <Text style={styles.blockageDescription}>
+                      Close Date:{" "}
+                      {blockage?.closureDate
+                        ? formatDate(blockage.closureDate)
+                        : blockage?.blockageEndTime
+                          ? formatDate(blockage.blockageEndTime)
+                          : "N/A"}
+                    </Text>
+                    {blockage?.closureRemarks && (
+                      <Text style={styles.blockageDescription}>
+                        Closure Remarks: {blockage.closureRemarks}
+                      </Text>
+                    )}
+                  </>
+                )}
                 {blockage?.blockagePhotos?.length &&
                 blockage.blockagePhotos[0]?.url &&
                 blockage.blockagePhotos[0].url.trim() !== "" ? (
@@ -729,15 +801,29 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
                   Weather Report: {blockage?.weatherReport}
                 </Text>
                 <Text style={styles.blockageDescription}>
-                  Reported on:{" "}
-                  {formatDate(blockage?.blockageStartTime ?? new Date())}
+                  Status: <Text style={styles.blockageType}>{blockage?.status ?? "OPEN"}</Text>
                 </Text>
                 <Text style={styles.blockageDescription}>
-                  Closed on:{" "}
-                  {blockage?.blockageEndTime
-                    ? formatDate(blockage.blockageEndTime)
-                    : "N/A"}
+                  Open Date:{" "}
+                  {formatDate(blockage?.blockageStartTime ?? new Date())}
                 </Text>
+                {blockage?.status === "CLOSED" && (
+                  <>
+                    <Text style={styles.blockageDescription}>
+                      Close Date:{" "}
+                      {blockage?.closureDate
+                        ? formatDate(blockage.closureDate)
+                        : blockage?.blockageEndTime
+                          ? formatDate(blockage.blockageEndTime)
+                          : "N/A"}
+                    </Text>
+                    {blockage?.closureRemarks && (
+                      <Text style={styles.blockageDescription}>
+                        Closure Remarks: {blockage.closureRemarks}
+                      </Text>
+                    )}
+                  </>
+                )}
                 {blockage?.blockagePhotos?.length &&
                 blockage.blockagePhotos[0]?.url &&
                 blockage.blockagePhotos[0].url.trim() !== "" ? (
@@ -782,9 +868,33 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
         ?.filter((blockage: BlockageItem) => blockage.type === "CLIENT")
         ?.filter((blockage: BlockageItem) => blockage.description !== ""),
   );
+
+  // Calculate remaining days and per-day targets
+  const calculateRemainingDays = (targetDate: string | Date | null | undefined): number => {
+    if (!targetDate) return 0;
+    const target = new Date(targetDate);
+    const reportDate = new Date();
+    if (isNaN(target.getTime())) return 0;
+    const diffTime = target.getTime() - reportDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
+    if (remainingDays <= 0) return 0;
+    return Math.round(balance / remainingDays);
+  };
+
+  const formatTargetDate = (date: string | Date | null | undefined): string => {
+    if (!date) return "N/A";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString();
+  };
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" orientation="landscape" style={styles.page}>
         {/* client information */}
         <View style={styles.header}>
           <Text style={styles.title}>{report.projectName}</Text>
@@ -810,33 +920,56 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
           <Text style={styles.sectionTitle}>Sheet 1</Text>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <Text style={styles.headerCell}>Main Task</Text>
-              <Text style={styles.headerCell}>Units</Text>
-              <Text style={styles.headerCell}>Total Qty</Text>
-              <Text style={styles.headerCell}>Total Supplied</Text>
-              <Text style={styles.headerCell}>Total Installed</Text>
-              <Text style={styles.headerCell}>Yet to Supply</Text>
-              <Text style={styles.headerCell}>Yet to Install</Text>
-              <Text style={styles.headerCell}>% Supplied</Text>
-              <Text style={styles.headerCell}>% Installed</Text>
+              <Text style={styles.headerMainTask}>Main Task</Text>
+              <Text style={styles.headerUnit}>Units</Text>
+              <Text style={styles.headerNumber}>Total Qty</Text>
+              <Text style={styles.headerNumber}>Supplied</Text>
+              <Text style={styles.headerNumber}>Installed</Text>
+              <Text style={styles.headerNumber}>Bal Supply</Text>
+              <Text style={styles.headerNumber}>Bal Install</Text>
+              <Text style={styles.headerDate}>Supply Target</Text>
+              <Text style={styles.headerDate}>Install Target</Text>
+              <Text style={styles.headerNumber}>Per Day Supply</Text>
+              <Text style={styles.headerNumber}>Per Day Install</Text>
+              <Text style={styles.headerPercent}>% Supp</Text>
+              <Text style={styles.headerPercent}>% Inst</Text>
             </View>
-            {latest?.sheet1?.map((item, idx) => (
-              <View style={styles.tableRow} key={idx}>
-                <Text style={styles.tableCell}>{item.itemName}</Text>
-                <Text style={styles.tableCell}>{item.unit}</Text>
-                <Text style={styles.tableCell}>{item.totalQuantity}</Text>
-                <Text style={styles.tableCell}>{item.totalSupplied}</Text>
-                <Text style={styles.tableCell}>{item.totalInstalled}</Text>
-                <Text style={styles.tableCell}>{item.yetToSupply}</Text>
-                <Text style={styles.tableCell}>{item.yetToInstall}</Text>
-                <Text style={styles.tableCell}>
-                  {Math.min(item.percentSupplied, 100)}%
-                </Text>
-                <Text style={styles.tableCell}>
-                  {Math.min(item.percentInstalled, 100)}%
-                </Text>
-              </View>
-            ))}
+            {latest?.sheet1?.map((item, idx) => {
+              const remainingDaysSupply = calculateRemainingDays(item.supplyTargetDate);
+              const remainingDaysInstall = calculateRemainingDays(item.installationTargetDate);
+              const perDaySupplyTarget = calculatePerDayTarget(item.yetToSupply, remainingDaysSupply);
+              const perDayInstallTarget = calculatePerDayTarget(item.yetToInstall, remainingDaysInstall);
+
+              return (
+                <View style={styles.tableRow} key={idx}>
+                  <Text style={styles.cellMainTask}>{item.itemName}</Text>
+                  <Text style={styles.cellUnit}>{item.unit}</Text>
+                  <Text style={styles.cellNumber}>{item.totalQuantity}</Text>
+                  <Text style={styles.cellNumber}>{item.totalSupplied}</Text>
+                  <Text style={styles.cellNumber}>{item.totalInstalled}</Text>
+                  <Text style={styles.cellNumber}>{item.yetToSupply}</Text>
+                  <Text style={styles.cellNumber}>{item.yetToInstall}</Text>
+                  <Text style={styles.cellDate}>
+                    {formatTargetDate(item.supplyTargetDate)}
+                  </Text>
+                  <Text style={styles.cellDate}>
+                    {formatTargetDate(item.installationTargetDate)}
+                  </Text>
+                  <Text style={styles.cellNumber}>
+                    {perDaySupplyTarget > 0 ? perDaySupplyTarget : "N/A"}
+                  </Text>
+                  <Text style={styles.cellNumber}>
+                    {perDayInstallTarget > 0 ? perDayInstallTarget : "N/A"}
+                  </Text>
+                  <Text style={styles.cellPercent}>
+                    {Math.min(item.percentSupplied, 100)}%
+                  </Text>
+                  <Text style={styles.cellPercent}>
+                    {Math.min(item.percentInstalled, 100)}%
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -952,15 +1085,29 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
                   Weather Report: {blockage?.weatherReport}
                 </Text>
                 <Text style={styles.blockageDescription}>
-                  Reported on:{" "}
-                  {formatDate(blockage?.blockageStartTime ?? new Date())}
+                  Status: <Text style={styles.blockageType}>{blockage?.status ?? "OPEN"}</Text>
                 </Text>
                 <Text style={styles.blockageDescription}>
-                  Closed on:{" "}
-                  {blockage?.blockageEndTime
-                    ? formatDate(blockage.blockageEndTime)
-                    : "N/A"}
+                  Open Date:{" "}
+                  {formatDate(blockage?.blockageStartTime ?? new Date())}
                 </Text>
+                {blockage?.status === "CLOSED" && (
+                  <>
+                    <Text style={styles.blockageDescription}>
+                      Close Date:{" "}
+                      {blockage?.closureDate
+                        ? formatDate(blockage.closureDate)
+                        : blockage?.blockageEndTime
+                          ? formatDate(blockage.blockageEndTime)
+                          : "N/A"}
+                    </Text>
+                    {blockage?.closureRemarks && (
+                      <Text style={styles.blockageDescription}>
+                        Closure Remarks: {blockage.closureRemarks}
+                      </Text>
+                    )}
+                  </>
+                )}
                 {blockage?.blockagePhotos?.length &&
                 blockage.blockagePhotos[0]?.url &&
                 blockage.blockagePhotos[0].url.trim() !== "" ? (

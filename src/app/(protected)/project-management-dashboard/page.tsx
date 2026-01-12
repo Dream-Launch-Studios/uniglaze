@@ -362,6 +362,23 @@ const ProjectManagementDashboard: React.FC = () => {
 
   const [sheet1Data, setSheet1Data] = useState<MasterDataRow[]>([]);
 
+  // Calculate remaining days from target date to today
+  const calculateRemainingDays = (targetDate: string | Date | null | undefined): number => {
+    if (!targetDate) return 0;
+    const target = new Date(targetDate);
+    const today = new Date();
+    if (isNaN(target.getTime())) return 0;
+    const diffTime = target.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays); // Return 0 if target date is in the past
+  };
+
+  // Calculate per-day target (rounded to whole number)
+  const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
+    if (remainingDays <= 0) return 0;
+    return Math.round(balance / remainingDays);
+  };
+
   useEffect(() => {
     if (selectedProject) {
       const project = projects?.data?.find(
@@ -371,17 +388,30 @@ const ProjectManagementDashboard: React.FC = () => {
 
       if (project) {
         setSheet1Data(
-          project.latestProjectVersion.sheet1?.map((item, index) => ({
-            id: index,
-            itemDescription: item.itemName + " " + item.unit,
-            quantity: item.totalQuantity,
-            supplied: item.totalSupplied,
-            installed: item.totalInstalled,
-            yetToSupply: item.yetToSupply,
-            yetToInstall: item.yetToInstall,
-            supplyProgress: item.percentSupplied,
-            installProgress: item.percentInstalled,
-          })) ?? [],
+          project.latestProjectVersion.sheet1?.map((item, index) => {
+            const remainingDaysSupply = calculateRemainingDays(item.supplyTargetDate);
+            const remainingDaysInstall = calculateRemainingDays(item.installationTargetDate);
+            const perDaySupplyTarget = calculatePerDayTarget(item.yetToSupply, remainingDaysSupply);
+            const perDayInstallTarget = calculatePerDayTarget(item.yetToInstall, remainingDaysInstall);
+
+            return {
+              id: index,
+              itemDescription: item.itemName + " " + item.unit,
+              quantity: item.totalQuantity,
+              supplied: item.totalSupplied,
+              installed: item.totalInstalled,
+              yetToSupply: item.yetToSupply,
+              yetToInstall: item.yetToInstall,
+              supplyProgress: item.percentSupplied,
+              installProgress: item.percentInstalled,
+              supplyTargetDate: item.supplyTargetDate,
+              installationTargetDate: item.installationTargetDate,
+              remainingDaysSupply,
+              remainingDaysInstall,
+              perDaySupplyTarget,
+              perDayInstallTarget,
+            };
+          }) ?? [],
         );
       }
     }

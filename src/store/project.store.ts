@@ -9,7 +9,12 @@ type ProjectData = Partial<z.infer<typeof projectSchema>>;
 type ProjectActions = {
   setProject: (data: Partial<z.infer<typeof projectSchema>>) => void;
 
-  closeBlockage: (sheet1Index: number, blockageIndex: number) => void;
+  closeBlockage: (
+    sheet1Index: number,
+    blockageIndex: number,
+    closureRemarks: string,
+    closedByUserId: string,
+  ) => void;
 
   getPendingBlockages: (
     sheet1Index: number,
@@ -196,7 +201,12 @@ export const useProjectStore = create<ProjectState>()(
     immer((set, get) => ({
       setProject: (project) => set(project),
 
-      closeBlockage: (sheet1Index: number, blockageIndex: number) =>
+      closeBlockage: (
+        sheet1Index: number,
+        blockageIndex: number,
+        closureRemarks: string,
+        closedByUserId: string,
+      ) =>
         set((state) => {
           if (
             !state.latestProjectVersion?.sheet1?.[sheet1Index]?.blockages?.[
@@ -204,22 +214,25 @@ export const useProjectStore = create<ProjectState>()(
             ]
           )
             return;
-          state.latestProjectVersion.sheet1[sheet1Index].blockages[
-            blockageIndex
-          ].blockageEndTime = new Date();
-          state.latestProjectVersion.sheet1[sheet1Index].blockages[
-            blockageIndex
-          ].status = "RESOLVED";
+          const blockage =
+            state.latestProjectVersion.sheet1[sheet1Index].blockages[
+              blockageIndex
+            ];
+          blockage.blockageEndTime = new Date();
+          blockage.status = "CLOSED";
+          blockage.closureRemarks = closureRemarks;
+          blockage.closureDate = new Date();
+          blockage.closedByUserId = closedByUserId;
         }),
 
       getResolvedBlockages: (sheet1Index: number) =>
         get().latestProjectVersion?.sheet1?.[sheet1Index]?.blockages?.filter(
-          (blockage) => blockage.status === "RESOLVED",
+          (blockage) => blockage.status === "CLOSED",
         ) ?? [],
 
       getPendingBlockages: (sheet1Index: number) =>
         get().latestProjectVersion?.sheet1?.[sheet1Index]?.blockages?.filter(
-          (blockage) => blockage.status === "PENDING",
+          (blockage) => blockage.status === "OPEN",
         ) ?? [],
 
       getSheet1Blockages: (sheet1Index: number) =>
@@ -278,6 +291,17 @@ export const useProjectStore = create<ProjectState>()(
         set((state) => {
           if (!state.latestProjectVersion?.sheet1?.[index]) return;
           state.latestProjectVersion.sheet1[index] = data;
+          
+          // Sync target dates to connected Sheet 2 items
+          const sheet1Item = state.latestProjectVersion.sheet1[index];
+          if (sheet1Item.sheet2) {
+            sheet1Item.sheet2.forEach((subItem) => {
+              if (subItem.connectWithSheet1Item) {
+                subItem.supplyTargetDate = sheet1Item.supplyTargetDate;
+                subItem.installationTargetDate = sheet1Item.installationTargetDate;
+              }
+            });
+          }
         }),
 
       deleteSheet1Item: (index) =>
@@ -413,7 +437,7 @@ export const useProjectStore = create<ProjectState>()(
             return;
           state.latestProjectVersion.sheet1[sheet1Index].blockages[
             blockageIndex
-          ].status = "RESOLVED";
+          ].status = "CLOSED";
 
           state.latestProjectVersion.sheet1[sheet1Index].blockages[
             blockageIndex
@@ -450,13 +474,7 @@ export const useProjectStore = create<ProjectState>()(
       updateSupplyAndInstallationsFromYesterdayProgressReport: () =>
         set((state) => {
           if (!state.latestProjectVersion?.sheet1) return;
-          state.latestProjectVersion.sheet1.forEach((item) => {
-            if (
-              item.sheet2.every((subItem) => subItem.percentInstalled === 0)
-            ) {
-              item.actualStartDate = new Date();
-            }
-          });
+          // Removed actualStartDate logic - using target dates instead
           state.latestProjectVersion.sheet1.forEach((item) => {
             item.sheet2.forEach((subItem) => {
               if (subItem.yesterdayProgressReport) {
@@ -517,13 +535,7 @@ export const useProjectStore = create<ProjectState>()(
               }
             });
           });
-          state.latestProjectVersion.sheet1.forEach((item) => {
-            if (
-              item.sheet2.every((subItem) => subItem.percentInstalled === 100)
-            ) {
-              item.actualEndDate = new Date();
-            }
-          });
+          // Removed actualEndDate logic - using target dates instead
         }),
     })),
     { name: "project", storage: createJSONStorage(() => localStorage) },

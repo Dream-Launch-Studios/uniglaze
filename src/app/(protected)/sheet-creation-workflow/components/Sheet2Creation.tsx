@@ -18,7 +18,10 @@ type SubTask = NonNullable<
 type NewSubTaskForm = Omit<
   SubTask["sheet2"][number],
   "yesterdayProgressReport" | "percentSupplied" | "percentInstalled"
->;
+> & {
+  supplyTargetDate?: Date;
+  installationTargetDate?: Date;
+};
 
 const sheet1Schema = projectVersionSchema.shape.sheet1;
 
@@ -44,6 +47,8 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
     totalSupplied: 0,
     totalInstalled: 0,
     connectWithSheet1Item: true,
+    supplyTargetDate: undefined,
+    installationTargetDate: undefined,
   });
   const [isAddingSubTask, setIsAddingSubTask] = useState<boolean>(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -63,6 +68,8 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
           itemName: sheet1Item.itemName,
           unit: sheet1Item.unit,
           totalQuantity: sheet1Item.totalQuantity,
+          supplyTargetDate: sheet1Item.supplyTargetDate ? new Date(sheet1Item.supplyTargetDate) : undefined,
+          installationTargetDate: sheet1Item.installationTargetDate ? new Date(sheet1Item.installationTargetDate) : undefined,
         }));
       }
     }
@@ -146,7 +153,9 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       });
     }
 
-    pushToSheet2(selectedItem, {
+    // Inherit target dates from Sheet 1 if connected
+    const sheet1Item = sheet1?.[selectedItem];
+    const finalSubTask = {
       ...subTaskToAdd,
       percentSupplied: +(
         (subTaskToAdd.totalSupplied / subTaskToAdd.totalQuantity) * 100
@@ -154,7 +163,15 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       percentInstalled: +(
         (subTaskToAdd.totalInstalled / subTaskToAdd.totalQuantity) * 100
       ).toFixed(2),
-    });
+      supplyTargetDate: subTaskToAdd.connectWithSheet1Item && sheet1Item?.supplyTargetDate
+        ? new Date(sheet1Item.supplyTargetDate)
+        : subTaskToAdd.supplyTargetDate,
+      installationTargetDate: subTaskToAdd.connectWithSheet1Item && sheet1Item?.installationTargetDate
+        ? new Date(sheet1Item.installationTargetDate)
+        : subTaskToAdd.installationTargetDate,
+    };
+
+    pushToSheet2(selectedItem, finalSubTask);
 
     setNewSubTask({
       subItemName: "",
@@ -163,6 +180,8 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       totalSupplied: 0,
       totalInstalled: 0,
       connectWithSheet1Item: true,
+      supplyTargetDate: undefined,
+      installationTargetDate: undefined,
     });
     setIsAddingSubTask(false);
     // setSelectedItem(null);
@@ -181,6 +200,8 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       totalSupplied: subTask.totalSupplied,
       totalInstalled: subTask.totalInstalled,
       connectWithSheet1Item: subTask.connectWithSheet1Item,
+      supplyTargetDate: subTask.supplyTargetDate ? new Date(subTask.supplyTargetDate) : undefined,
+      installationTargetDate: subTask.installationTargetDate ? new Date(subTask.installationTargetDate) : undefined,
     });
     setEditingIndex(index);
     setIsAddingSubTask(true);
@@ -220,6 +241,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       }
     }
 
+    const sheet1Item = sheet1?.[selectedItem];
     const updatedSubTask = {
       subItemName: newSubTask.subItemName,
       unit: newSubTask.unit,
@@ -227,6 +249,12 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       totalSupplied: newSubTask.totalSupplied,
       totalInstalled: newSubTask.totalInstalled,
       connectWithSheet1Item: newSubTask.connectWithSheet1Item,
+      supplyTargetDate: newSubTask.connectWithSheet1Item && sheet1Item?.supplyTargetDate
+        ? new Date(sheet1Item.supplyTargetDate)
+        : newSubTask.supplyTargetDate,
+      installationTargetDate: newSubTask.connectWithSheet1Item && sheet1Item?.installationTargetDate
+        ? new Date(sheet1Item.installationTargetDate)
+        : newSubTask.installationTargetDate,
     };
 
     editSheet2Item(selectedItem, editingIndex, {
@@ -542,12 +570,75 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
               </label>
               <Checkbox
                 checked={newSubTask.connectWithSheet1Item}
-                onChange={(event) =>
+                onChange={(event) => {
+                  const isConnected = event.target.checked;
+                  const sheet1Item = sheet1?.[selectedItem ?? -1];
                   setNewSubTask((prev) => ({
                     ...prev,
-                    connectWithSheet1Item: event.target.checked,
+                    connectWithSheet1Item: isConnected,
+                    // Inherit target dates from Sheet 1 when connected
+                    supplyTargetDate: isConnected && sheet1Item?.supplyTargetDate
+                      ? new Date(sheet1Item.supplyTargetDate)
+                      : prev.supplyTargetDate,
+                    installationTargetDate: isConnected && sheet1Item?.installationTargetDate
+                      ? new Date(sheet1Item.installationTargetDate)
+                      : prev.installationTargetDate,
+                  }));
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="text-text-secondary mb-2 block text-sm font-medium">
+                Supply Target Date
+                {newSubTask.connectWithSheet1Item && (
+                  <span className="text-text-secondary ml-1 text-xs">(Linked from Sheet 1)</span>
+                )}
+              </label>
+              <input
+                type="date"
+                value={
+                  newSubTask.supplyTargetDate?.toISOString().split("T")[0] ?? ""
+                }
+                onChange={(e) =>
+                  setNewSubTask((prev) => ({
+                    ...prev,
+                    supplyTargetDate: e.target.value ? new Date(e.target.value) : undefined,
                   }))
                 }
+                disabled={newSubTask.connectWithSheet1Item}
+                className={`border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+                  newSubTask.connectWithSheet1Item
+                    ? "bg-muted cursor-not-allowed opacity-60"
+                    : ""
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className="text-text-secondary mb-2 block text-sm font-medium">
+                Installation Target Date
+                {newSubTask.connectWithSheet1Item && (
+                  <span className="text-text-secondary ml-1 text-xs">(Linked from Sheet 1)</span>
+                )}
+              </label>
+              <input
+                type="date"
+                value={
+                  newSubTask.installationTargetDate?.toISOString().split("T")[0] ?? ""
+                }
+                onChange={(e) =>
+                  setNewSubTask((prev) => ({
+                    ...prev,
+                    installationTargetDate: e.target.value ? new Date(e.target.value) : undefined,
+                  }))
+                }
+                disabled={newSubTask.connectWithSheet1Item}
+                className={`border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+                  newSubTask.connectWithSheet1Item
+                    ? "bg-muted cursor-not-allowed opacity-60"
+                    : ""
+                }`}
               />
             </div>
           </div>
@@ -656,6 +747,12 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
                     Connected to sheet1
                   </th>
                   <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                    Supply Target Date
+                  </th>
+                  <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                    Installation Target Date
+                  </th>
+                  <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
                     Actions
                   </th>
                 </tr>
@@ -684,6 +781,22 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
                       </td>
                       <td className="text-text-primary px-4 py-3 text-sm">
                         {subTask.connectWithSheet1Item ? "Yes" : "No"}
+                      </td>
+                      <td className="text-text-secondary px-4 py-3 text-sm">
+                        {subTask.supplyTargetDate
+                          ? new Date(subTask.supplyTargetDate).toLocaleDateString()
+                          : "N/A"}
+                        {subTask.connectWithSheet1Item && (
+                          <span className="text-text-secondary ml-1 text-xs">(Linked)</span>
+                        )}
+                      </td>
+                      <td className="text-text-secondary px-4 py-3 text-sm">
+                        {subTask.installationTargetDate
+                          ? new Date(subTask.installationTargetDate).toLocaleDateString()
+                          : "N/A"}
+                        {subTask.connectWithSheet1Item && (
+                          <span className="text-text-secondary ml-1 text-xs">(Linked)</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center space-x-2">

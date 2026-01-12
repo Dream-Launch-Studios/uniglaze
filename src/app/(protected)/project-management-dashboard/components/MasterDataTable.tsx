@@ -12,6 +12,12 @@ interface MasterDataRow {
   yetToInstall: number;
   supplyProgress: number;
   installProgress: number;
+  supplyTargetDate?: string | Date | null;
+  installationTargetDate?: string | Date | null;
+  remainingDaysSupply?: number;
+  remainingDaysInstall?: number;
+  perDaySupplyTarget?: number;
+  perDayInstallTarget?: number;
   hasPhotos?: boolean;
   isBlocked?: boolean;
 }
@@ -155,8 +161,12 @@ const MasterDataTable: React.FC<MasterDataTableProps> = ({
                 { key: "quantity" as const, label: "Quantity" },
                 { key: "supplied" as const, label: "Supplied" },
                 { key: "installed" as const, label: "Installed" },
-                { key: "yetToSupply" as const, label: "Yet to Supply" },
-                { key: "yetToInstall" as const, label: "Yet to Install" },
+                { key: "yetToSupply" as const, label: "Balance to Supply" },
+                { key: "yetToInstall" as const, label: "Balance to Install" },
+                { key: "remainingDaysSupply" as const, label: "Remaining Days (Supply)" },
+                { key: "remainingDaysInstall" as const, label: "Remaining Days (Install)" },
+                { key: "perDaySupplyTarget" as const, label: "Per Day Supply Target" },
+                { key: "perDayInstallTarget" as const, label: "Per Day Install Target" },
                 { key: "supplyProgress" as const, label: "Supply %" },
                 { key: "installProgress" as const, label: "Install %" },
                 // { key: "actions" as const, label: "Actions" },
@@ -298,6 +308,26 @@ const MasterDataTable: React.FC<MasterDataTableProps> = ({
                 </td>
                 <td className="text-text-secondary p-3">{row.yetToSupply}</td>
                 <td className="text-text-secondary p-3">{row.yetToInstall}</td>
+                <td className="text-text-secondary p-3">
+                  {row.remainingDaysSupply !== undefined && row.remainingDaysSupply > 0
+                    ? row.remainingDaysSupply
+                    : "N/A"}
+                </td>
+                <td className="text-text-secondary p-3">
+                  {row.remainingDaysInstall !== undefined && row.remainingDaysInstall > 0
+                    ? row.remainingDaysInstall
+                    : "N/A"}
+                </td>
+                <td className="text-text-secondary p-3">
+                  {row.perDaySupplyTarget !== undefined && row.perDaySupplyTarget > 0
+                    ? row.perDaySupplyTarget
+                    : "N/A"}
+                </td>
+                <td className="text-text-secondary p-3">
+                  {row.perDayInstallTarget !== undefined && row.perDayInstallTarget > 0
+                    ? row.perDayInstallTarget
+                    : "N/A"}
+                </td>
                 <td className="p-3">
                   <div className="flex items-center space-x-2">
                     <div className="bg-muted h-2 w-16 rounded-full">

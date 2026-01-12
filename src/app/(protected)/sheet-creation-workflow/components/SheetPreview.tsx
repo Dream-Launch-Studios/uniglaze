@@ -168,6 +168,12 @@ const SheetPreview: React.FC<SheetPreviewProps> = ({
                 <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
                   % Installed
                 </th>
+                <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                  Supply Target Date
+                </th>
+                <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                  Installation Target Date
+                </th>
               </tr>
             </thead>
             <tbody className="divide-border divide-y">
@@ -223,6 +229,16 @@ const SheetPreview: React.FC<SheetPreviewProps> = ({
                       {item.percentInstalled}%
                     </span>
                   </td>
+                  <td className="text-text-secondary px-4 py-3 text-sm">
+                    {item.supplyTargetDate
+                      ? new Date(item.supplyTargetDate).toLocaleDateString()
+                      : "N/A"}
+                  </td>
+                  <td className="text-text-secondary px-4 py-3 text-sm">
+                    {item.installationTargetDate
+                      ? new Date(item.installationTargetDate).toLocaleDateString()
+                      : "N/A"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -273,9 +289,12 @@ const SheetPreview: React.FC<SheetPreviewProps> = ({
                 <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
                   Installed
                 </th>
-                {/* <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
-                  Connected to Sheet 1
-                </th> */}
+                <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                  Supply Target Date
+                </th>
+                <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                  Installation Target Date
+                </th>
               </tr>
             </thead>
             <tbody className="divide-border divide-y">
@@ -303,9 +322,22 @@ const SheetPreview: React.FC<SheetPreviewProps> = ({
                     <td className="text-text-primary px-4 py-3 text-sm">
                       {subTask.totalInstalled}
                     </td>
-                    {/* <td className="text-text-primary px-4 py-3 text-sm">
-                      {subTask.connectWithSheet1Item ? "Yes" : "No"}
-                    </td> */}
+                    <td className="text-text-secondary px-4 py-3 text-sm">
+                      {subTask.supplyTargetDate
+                        ? new Date(subTask.supplyTargetDate).toLocaleDateString()
+                        : "N/A"}
+                      {subTask.connectWithSheet1Item && (
+                        <span className="text-text-secondary ml-1 text-xs">(Linked)</span>
+                      )}
+                    </td>
+                    <td className="text-text-secondary px-4 py-3 text-sm">
+                      {subTask.installationTargetDate
+                        ? new Date(subTask.installationTargetDate).toLocaleDateString()
+                        : "N/A"}
+                      {subTask.connectWithSheet1Item && (
+                        <span className="text-text-secondary ml-1 text-xs">(Linked)</span>
+                      )}
+                    </td>
                   </tr>
                 )),
               )}

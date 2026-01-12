@@ -5,7 +5,7 @@ import { z } from "zod";
 export const BlockageSeverity = ["LOW", "MEDIUM", "HIGH"] as const;
 export type BlockageSeverity = (typeof BlockageSeverity)[number];
 
-export const BlockageStatus = ["PENDING", "RESOLVED", "IGNORED"] as const;
+export const BlockageStatus = ["OPEN", "CLOSED"] as const;
 export type BlockageStatus = (typeof BlockageStatus)[number];
 
 export const BlockageType = ["CLIENT", "INTERNAL"] as const;
@@ -67,12 +67,8 @@ export const projectVersionSchema = z
         z.object({
           itemName: z.string().min(2),
           unit: z.string().min(2),
-          actualStartDate: z.coerce.date().optional(),
-          actualEndDate: z.coerce.date().optional(),
-          plannedStartDate: z.coerce.date().optional(),
-          plannedEndDate: z.coerce.date().optional(),
-          revisedStartDate: z.coerce.date().optional(),
-          revisedEndDate: z.coerce.date().optional(),
+          supplyTargetDate: z.coerce.date().optional(),
+          installationTargetDate: z.coerce.date().optional(),
           totalQuantity: z.number(),
           totalSupplied: z.number(),
           yetToSupply: z.number(),
@@ -107,8 +103,9 @@ export const projectVersionSchema = z
                 manPower: z.number(),
                 blockageStartTime: z.coerce.date(),
                 blockageEndTime: z.coerce.date().optional(),
-                // openDate: z.coerce.date(),
-                // estimatedCloseDate: z.coerce.date(),
+                closureRemarks: z.string().optional(),
+                closureDate: z.coerce.date().optional(),
+                closedByUserId: z.string().optional(),
                 blockagePhotos: z.array(
                   z.object({
                     s3Key: z.string(),
@@ -130,6 +127,8 @@ export const projectVersionSchema = z
               percentSupplied: z.number(),
               percentInstalled: z.number(),
               connectWithSheet1Item: z.boolean(),
+              supplyTargetDate: z.coerce.date().optional(),
+              installationTargetDate: z.coerce.date().optional(),
               yesterdayProgressReport: z
                 .object({
                   yesterdaySupplied: z.coerce.number(),

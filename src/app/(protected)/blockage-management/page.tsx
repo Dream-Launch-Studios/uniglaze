@@ -10,10 +10,14 @@ import Input from "@/components/rocket/components/ui/Input";
 import Icon from "@/components/rocket/components/AppIcon";
 import BlockageFilters from "./components/BlockageFilters";
 import BlockageCard from "./components/BlockageCard";
+import CloseBlockageModal from "./components/CloseBlockageModal";
 import { api } from "@/trpc/react";
 import type { Session } from "@/server/auth";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useProjectStore } from "@/store/project.store";
+import { Role } from "@prisma/client";
+import { toast } from "sonner";
 // import BlockageDetailModal from "./components/BlockageDetailModal";
 // import AddBlockageModal from "./components/AddBlockageModal";
 // import BlockageStats from "./components/BlockageStats";
@@ -37,17 +41,20 @@ interface Blockage {
   title: string;
   description: string;
   project: string;
-  // location: string; //
+  projectId: number;
+  sheet1Index: number;
+  blockageIndex: number;
   category: "client" | "internal" | "supplier" | "weather";
   severity: "critical" | "high" | "medium" | "low";
-  // status: "open" | "in-progress" | "pending-approval" | "resolved" | "closed"; //
+  status: "OPEN" | "CLOSED";
   assignedTo: string;
   createdAt: Date;
-  // clientVisible: boolean; //
+  closureDate?: Date;
+  closureRemarks?: string;
+  closedByUserId?: string;
+  closedByName?: string;
   priority: boolean;
-  // commentsCount: number; //
   photos: BlockagePhoto[];
-  // timeline: BlockageTimelineEvent[]; //
 }
 
 // For components that expect different formats
@@ -148,27 +155,49 @@ const BlockageManagement: React.FC = () => {
     overdue: false,
   });
 
-  //
-  // Mock blockages data
   const [blockages, setBlockages] = useState<Blockage[]>();
+  const [selectedBlockageForClose, setSelectedBlockageForClose] =
+    useState<Blockage | null>(null);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState<boolean>(false);
+  const { closeBlockage } = useProjectStore();
+  const { mutateAsync: updateProjectVersion } =
+    api.project.createProjectVersion.useMutation();
 
   useEffect(() => {
     const bs =
       projects?.data?.flatMap((project) =>
-        project.latestProjectVersion?.sheet1?.flatMap((item) =>
-          item.blockages?.map((blockage) => {
+        project.latestProjectVersion?.sheet1?.flatMap((item, sheet1Index) =>
+          item.blockages?.map((blockage, blockageIndex) => {
             return {
-              id: project.latestProjectVersion?.projectId?.toString() ?? "",
+              id: `${project.latestProjectVersion?.projectId}-${sheet1Index}-${blockageIndex}`,
               title: project.latestProjectVersion?.projectName ?? "",
               description: blockage.description ?? "",
               project:
                 project.latestProjectVersion?.projectName.toLowerCase() ?? "",
+              projectId: project.latestProjectVersion?.projectId ?? 0,
+              sheet1Index,
+              blockageIndex,
               category: blockage.category as Blockage["category"],
               severity: blockage.severity as Blockage["severity"],
+              status: (blockage.status ?? "OPEN") as "OPEN" | "CLOSED",
               assignedTo: project.assignedProjectManager?.name ?? "",
               createdAt: blockage.blockageStartTime
                 ? new Date(blockage.blockageStartTime)
                 : new Date(),
+              closureDate: blockage.closureDate
+                ? new Date(blockage.closureDate)
+                : undefined,
+              closureRemarks: blockage.closureRemarks,
+              closedByUserId: blockage.closedByUserId,
+              closedByName: blockage.closedByUserId
+                ? projects?.data
+                    ?.find(
+                      (p) =>
+                        p.latestProjectVersion.projectId ===
+                        project.latestProjectVersion?.projectId,
+                    )
+                    ?.assignedProjectManager?.name ?? "Unknown"
+                : undefined,
               priority:
                 project.latestProjectVersion?.priorityLevel === "HIGH_PRIORITY"
                   ? true
@@ -185,7 +214,7 @@ const BlockageManagement: React.FC = () => {
         ),
       ) ?? [];
     setBlockages(bs.filter((b) => b !== undefined));
-  }, [isProjectsLoading]);
+  }, [isProjectsLoading, projects]);
 
   //   [
   //   {
@@ -507,21 +536,228 @@ const BlockageManagement: React.FC = () => {
   // };
 
   // Convert blockage to format expected by BlockageCard
+  const handleCloseBlockage = async (closureRemarks: string): Promise<void> => {
+    if (!selectedBlockageForClose || !session?.user?.id) return;
+
+    try {
+      // Find the project in the store
+      const project = projects?.data?.find(
+        (p) =>
+          p.latestProjectVersion.projectId ===
+          selectedBlockageForClose.projectId,
+      );
+
+      if (!project) {
+        toast.error("Project not found");
+        return;
+      }
+
+      // Update the blockage in the store
+      closeBlockage(
+        selectedBlockageForClose.sheet1Index,
+        selectedBlockageForClose.blockageIndex,
+        closureRemarks,
+        session.user.id,
+      );
+
+      // Get updated project data
+      const updatedProject = useProjectStore.getState().getProject();
+
+      // Save to database
+      await updateProjectVersion({
+        ...updatedProject.latestProjectVersion,
+        projectId: selectedBlockageForClose.projectId,
+      });
+
+      toast.success("Blockage closed successfully");
+      setIsCloseModalOpen(false);
+      setSelectedBlockageForClose(null);
+
+      // Refresh blockages
+      const bs =
+        projects?.data?.flatMap((proj) =>
+          proj.latestProjectVersion?.sheet1?.flatMap((item, sheet1Idx) =>
+            item.blockages?.map((blockage, blockageIdx) => {
+              return {
+                id: `${proj.latestProjectVersion?.projectId}-${sheet1Idx}-${blockageIdx}`,
+                title: proj.latestProjectVersion?.projectName ?? "",
+                description: blockage.description ?? "",
+                project:
+                  proj.latestProjectVersion?.projectName.toLowerCase() ?? "",
+                projectId: proj.latestProjectVersion?.projectId ?? 0,
+                sheet1Index: sheet1Idx,
+                blockageIndex: blockageIdx,
+                category: blockage.category as Blockage["category"],
+                severity: blockage.severity as Blockage["severity"],
+                status: (blockage.status ?? "OPEN") as "OPEN" | "CLOSED",
+                assignedTo: proj.assignedProjectManager?.name ?? "",
+                createdAt: blockage.blockageStartTime
+                  ? new Date(blockage.blockageStartTime)
+                  : new Date(),
+                closureDate: blockage.closureDate
+                  ? new Date(blockage.closureDate)
+                  : undefined,
+                closureRemarks: blockage.closureRemarks,
+                closedByUserId: blockage.closedByUserId,
+                closedByName: blockage.closedByUserId
+                  ? projects?.data
+                      ?.find(
+                        (p) =>
+                          p.latestProjectVersion.projectId ===
+                          proj.latestProjectVersion?.projectId,
+                      )
+                      ?.assignedProjectManager?.name ?? "Unknown"
+                  : undefined,
+                priority:
+                  proj.latestProjectVersion?.priorityLevel === "HIGH_PRIORITY"
+                    ? true
+                    : false,
+                photos: blockage.blockagePhotos.map((photo) => ({
+                  url: photo.url ?? "",
+                  description: blockage.description ?? "",
+                  timestamp: blockage.blockageStartTime
+                    ? new Date(blockage.blockageStartTime)
+                    : new Date(),
+                })),
+              };
+            }),
+          ),
+        ) ?? [];
+      setBlockages(bs.filter((b) => b !== undefined));
+    } catch (error) {
+      console.error("Error closing blockage:", error);
+      toast.error("Failed to close blockage");
+    }
+  };
+
+  const handleOpenCloseModal = (blockage: Blockage): void => {
+    setSelectedBlockageForClose(blockage);
+    setIsCloseModalOpen(true);
+  };
+
+  const handleExportBlockages = (): void => {
+    if (!blockages || blockages.length === 0) {
+      toast.error("No blockages to export");
+      return;
+    }
+
+    // Show export options
+    const exportType = window.confirm(
+      "Click OK for PDF export, Cancel for Excel export",
+    );
+
+    if (exportType) {
+      exportToPDF(blockages);
+    } else {
+      exportToExcel(blockages);
+    }
+  };
+
+  const exportToPDF = (blockagesToExport: Blockage[]): void => {
+    // Create PDF content
+    const content = blockagesToExport.map((blockage, index) => {
+      return `
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+          <h3 style="margin: 0 0 10px 0;">Blockage #${index + 1}</h3>
+          <p><strong>Project:</strong> ${blockage.title}</p>
+          <p><strong>Description:</strong> ${blockage.description}</p>
+          <p><strong>Status:</strong> ${blockage.status}</p>
+          <p><strong>Open Date:</strong> ${blockage.createdAt.toLocaleDateString()}</p>
+          ${blockage.closureDate ? `<p><strong>Close Date:</strong> ${blockage.closureDate.toLocaleDateString()}</p>` : ""}
+          <p><strong>Category:</strong> ${blockage.category}</p>
+          <p><strong>Severity:</strong> ${blockage.severity}</p>
+          ${blockage.closureRemarks ? `<p><strong>Closure Remarks:</strong> ${blockage.closureRemarks}</p>` : ""}
+          ${blockage.closedByName ? `<p><strong>Closed By:</strong> ${blockage.closedByName}</p>` : ""}
+        </div>
+      `;
+    }).join("");
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Blockages Export</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #333; }
+          </style>
+        </head>
+        <body>
+          <h1>Blockages Report</h1>
+          <p>Generated on: ${new Date().toLocaleString()}</p>
+          ${content}
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `blockages-export-${new Date().toISOString().split("T")[0]}.html`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("PDF export initiated");
+  };
+
+  const exportToExcel = (blockagesToExport: Blockage[]): void => {
+    // Create CSV content
+    const headers = [
+      "Project",
+      "Description",
+      "Status",
+      "Open Date",
+      "Close Date",
+      "Category",
+      "Severity",
+      "Closure Remarks",
+      "Closed By",
+    ];
+
+    const rows = blockagesToExport.map((blockage) => [
+      blockage.title,
+      blockage.description,
+      blockage.status,
+      blockage.createdAt.toLocaleDateString(),
+      blockage.closureDate?.toLocaleDateString() ?? "",
+      blockage.category,
+      blockage.severity,
+      blockage.closureRemarks ?? "",
+      blockage.closedByName ?? "",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `blockages-export-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Excel export completed");
+  };
+
   const convertToCardData = (blockage: Blockage): BlockageCardData => ({
     id: blockage.id,
     title: blockage.title,
     description: blockage.description,
     project: blockage.project,
-    // location: blockage.location, //
     severity: blockage.severity,
     category: blockage.category,
-    // status: blockage.status, //
+    status: blockage.status,
     createdAt: blockage.createdAt.toISOString(),
-    // clientVisible: blockage.clientVisible, //
     assignedTo: blockage.assignedTo,
     priority: blockage.priority,
-    // commentsCount: blockage.commentsCount, //
     photos: blockage.photos,
+    closureDate: blockage.closureDate?.toISOString(),
+    closureRemarks: blockage.closureRemarks,
+    closedByName: blockage.closedByName,
   });
 
   // // Convert blockage to format expected by BlockageDetailModal
@@ -737,6 +973,16 @@ const BlockageManagement: React.FC = () => {
                   <span className="text-text-secondary text-sm">
                     {sortedBlockages?.length} of {blockages?.length} blockages
                   </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    iconName="Download"
+                    iconPosition="left"
+                    iconSize={16}
+                    onClick={handleExportBlockages}
+                  >
+                    Download Blockages
+                  </Button>
                   <div className="border-border flex items-center rounded-lg border">
                     <Button
                       variant={viewMode === "grid" ? "default" : "ghost"}
@@ -769,13 +1015,17 @@ const BlockageManagement: React.FC = () => {
                 >
                   {sortedBlockages?.map((blockage) => (
                     <BlockageCard
-                      key={blockage.photos?.[0]?.url}
+                      key={blockage.id}
                       blockage={convertToCardData(blockage)}
-                      // onViewDetails={(cardData) => handleViewDetails(blockage)}
                       onViewDetails={(cardData) => ({})}
                       onStatusChange={handleStatusChange}
-                      // onEdit={(cardData) => handleEditBlockage(blockage)}
                       onEdit={(cardData) => ({})}
+                      onClose={
+                        blockage.status === "OPEN" &&
+                        session?.user?.customRole === Role.PROJECT_MANAGER
+                          ? () => handleOpenCloseModal(blockage)
+                          : undefined
+                      }
                     />
                   ))}
                 </div>
@@ -837,6 +1087,18 @@ const BlockageManagement: React.FC = () => {
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddBlockage}
       /> */}
+
+      <CloseBlockageModal
+        isOpen={isCloseModalOpen}
+        onClose={() => {
+          setIsCloseModalOpen(false);
+          setSelectedBlockageForClose(null);
+        }}
+        onConfirm={handleCloseBlockage}
+        blockageDescription={
+          selectedBlockageForClose?.description ?? "Blockage"
+        }
+      />
     </div>
   );
 };
