@@ -121,7 +121,7 @@ const ReportPreview = () => {
             No Report Selected
           </h3>
           <p className="text-text-secondary">
-            Select a report from the list to preview
+            Select a report from the list given to preview
           </p>
         </div>
       </div>
