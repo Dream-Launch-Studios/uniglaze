@@ -117,6 +117,9 @@ export function LoginForm({
                                 type="password"
                               />
                             </FormControl>
+                            <p className="text-muted-foreground text-xs">
+                              Minimum 8 characters.
+                            </p>
                             <FormMessage />
                           </FormItem>
                         )}

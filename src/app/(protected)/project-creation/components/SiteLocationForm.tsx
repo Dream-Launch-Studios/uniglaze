@@ -159,6 +159,9 @@ const SiteLocationForm: React.FC<SiteLocationFormProps> = ({ form }) => {
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary mt-1 text-xs">
+                    6 digits only (e.g. 500001).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

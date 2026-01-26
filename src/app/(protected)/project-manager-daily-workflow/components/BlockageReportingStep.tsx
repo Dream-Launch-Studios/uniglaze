@@ -548,6 +548,9 @@ const BlockageReportingStep = ({
                         required
                       />
                     </FormControl>
+                    <p className="text-text-secondary mt-1 text-xs">
+                      Be specific so the team can act on it (what, where, impact).
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -570,6 +573,9 @@ const BlockageReportingStep = ({
                         required
                       />
                     </FormControl>
+                    <p className="text-text-secondary mt-1 text-xs">
+                      e.g. clear, rain, wind speed — helps with delay claims.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

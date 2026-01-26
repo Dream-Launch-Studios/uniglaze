@@ -237,6 +237,9 @@ const ItemForm = ({
                       </p>
                     </div>
                   </div>
+                  <p className="text-text-secondary mb-2 text-xs">
+                    Whole numbers only. Cannot exceed total quantity for this item.
+                  </p>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <FormField
                       control={form.control}

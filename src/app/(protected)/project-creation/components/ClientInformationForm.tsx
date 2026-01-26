@@ -137,6 +137,9 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary text-xs">
+                    Include country code if outside India (e.g. +91 9876543210).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -185,6 +188,9 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary text-xs">
+                    Separate multiple addresses with commas (e.g. a@x.com, b@x.com).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -234,6 +240,9 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary text-xs">
+                    Separate multiple addresses with commas (e.g. a@x.com, b@x.com).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -256,6 +265,9 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary text-xs">
+                    15 characters (e.g. 22AAAAA0000A1Z5).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

@@ -395,8 +395,8 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
                 Add Comment
               </label>
               <p className="text-text-secondary mb-3 text-xs">
-                Comments are required for requesting changes or rejecting
-                reports
+                Comments are required for requesting changes or rejecting reports.
+                Be specific so the other person knows what to fix or do.
               </p>
             </div>
 

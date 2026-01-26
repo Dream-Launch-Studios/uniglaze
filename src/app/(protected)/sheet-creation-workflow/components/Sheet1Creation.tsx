@@ -390,6 +390,7 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
                 min="0"
                 step="0.01"
               />
+              <p className="text-text-secondary mt-1 text-xs">Numbers only.</p>
             </div>
 
             <div>
@@ -410,6 +411,7 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
                 min="0"
                 step="0.01"
               />
+              <p className="text-text-secondary mt-1 text-xs">Numbers only.</p>
             </div>
 
             <div>
@@ -430,6 +432,7 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
                 min="0"
                 step="0.01"
               />
+              <p className="text-text-secondary mt-1 text-xs">Numbers only.</p>
             </div>
 
             <div>

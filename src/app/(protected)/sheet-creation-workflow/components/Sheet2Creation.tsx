@@ -526,6 +526,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
                 className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
                 placeholder="e.g., 100"
               />
+              <p className="text-text-secondary mt-1 text-xs">Numbers only.</p>
             </div>
 
             <div>
@@ -544,6 +545,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
                 className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
                 placeholder="e.g., 100"
               />
+              <p className="text-text-secondary mt-1 text-xs">Numbers only.</p>
             </div>
 
             <div>
@@ -562,6 +564,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
                 className="border-border focus:ring-primary/20 focus:border-primary w-full rounded-lg border px-3 py-2 focus:ring-2"
                 placeholder="e.g., 100"
               />
+              <p className="text-text-secondary mt-1 text-xs">Numbers only.</p>
             </div>
 
             <div className="flex items-end gap-2">
