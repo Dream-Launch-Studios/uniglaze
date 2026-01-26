@@ -465,6 +465,11 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
           {/* Sheet 2 */}
           <div className="mt-8 flex flex-col">
             <h2 className="text-text-primary text-lg font-medium">Sheet 2</h2>
+            {isEditMode && (
+              <p className="text-warning border-warning/30 bg-warning/10 mb-3 rounded-md border px-3 py-2 text-xs">
+                When editing: use whole numbers only. Supplied and installed cannot exceed total quantity. Items linked to Sheet 1 should have the same values as the main item.
+              </p>
+            )}
             <Table>
               <TableHeader>
                 <TableRow>

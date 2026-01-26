@@ -590,6 +590,9 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
                 }}
               />
             </div>
+            <p className="text-warning border-warning/30 bg-warning/10 -mt-1 rounded-md border px-3 py-2 text-xs">
+              If linked to Sheet 1, this item’s Total quantity / Supplied / Installed must match the same values as the main item on Sheet 1.
+            </p>
 
             <div>
               <label className="text-text-secondary mb-2 block text-sm font-medium">

@@ -230,6 +230,9 @@ const SupplyInstallDataStep: React.FC<SupplyInstallDataStepProps> = ({
                   />
                 </div>
               </div>
+              <p className="text-text-secondary mb-4 text-xs">
+                Whole numbers only. Supplied cannot exceed total quantity; installed cannot exceed supplied.
+              </p>
 
               {/* Progress Visualization */}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

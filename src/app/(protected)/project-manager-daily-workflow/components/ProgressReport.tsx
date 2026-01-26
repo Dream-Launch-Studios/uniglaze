@@ -331,6 +331,9 @@ const ProgressReport = ({
                         required
                       />
                     </FormControl>
+                    <p className="text-text-secondary mt-1 text-xs">
+                      Be specific so reviewers understand what was done.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

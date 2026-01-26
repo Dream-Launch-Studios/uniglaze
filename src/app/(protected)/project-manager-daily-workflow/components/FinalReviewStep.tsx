@@ -277,6 +277,9 @@ const FinalReviewStep: React.FC<FinalReviewStepProps> = ({
       )}
 
       {/* Action Buttons */}
+      <p className="text-text-secondary mt-6 text-xs">
+        Check quantities and blockages before submitting. Once submitted, the report goes for approval.
+      </p>
       <div className="border-border mt-8 flex justify-between border-t pt-6">
         {/* <Button
           variant="outline"
