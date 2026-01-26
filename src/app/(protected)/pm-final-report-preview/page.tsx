@@ -129,7 +129,7 @@ const ReportPreview = () => {
   }
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen p-x-4">
       <Header />
       <Sidebar />
 
@@ -179,7 +179,7 @@ const ReportPreview = () => {
                       <TableHead>Units</TableHead>
                       <TableHead>Total Quantity</TableHead>
                       <TableHead>Total Supplied</TableHead>
-                      <TableHead>Total Installed</TableHead>
+                      <TableHead>Total Installed Quantity of Units</TableHead>
                       <TableHead>Balance to Supply</TableHead>
                       <TableHead>Balance to Install</TableHead>
                       <TableHead>Supply Target Date</TableHead>
@@ -188,8 +188,8 @@ const ReportPreview = () => {
                       <TableHead>Remaining Days (Install)</TableHead>
                       <TableHead>Per Day Supply Target</TableHead>
                       <TableHead>Per Day Install Target</TableHead>
-                      <TableHead>% Supplied</TableHead>
-                      <TableHead>% Installed</TableHead>
+                      <TableHead>% Supplied in logarithmic quanity</TableHead>
+                      <TableHead>% Installed in logarithmic quantity</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

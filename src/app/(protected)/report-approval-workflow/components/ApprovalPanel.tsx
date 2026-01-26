@@ -159,6 +159,52 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
   };
 
   const handleSendPDF = async (): Promise<void> => {
+    const clientEmailRaw = project?.latestProjectVersion?.client?.clientEmail ?? "";
+    const internalEmailRaw = project?.latestProjectVersion?.client?.internalEmail ?? "";
+    const clientEmails = clientEmailRaw.split(",").map((e) => e.trim()).filter(Boolean);
+    const internalEmails = internalEmailRaw.split(",").map((e) => e.trim()).filter(Boolean);
+    const clientEmail = clientEmails[0] ?? "";
+    const internalEmail = internalEmails[0] ?? "";
+    const clientCC = [
+      ...clientEmails.slice(1),
+      ...(project?.latestProjectVersion?.client?.clientCCEmails
+        ?.split(",")
+        .map((e) => e.trim())
+        .filter((e) => e.length > 0) ?? []),
+    ];
+    const internalCC = [
+      ...internalEmails.slice(1),
+      ...(project?.latestProjectVersion?.client?.internalCCEmails
+        ?.split(",")
+        .map((e) => e.trim())
+        .filter((e) => e.length > 0) ?? []),
+    ];
+    // #region agent log
+    fetch("http://127.0.0.1:7243/ingest/a29a5f74-0241-4040-b26d-3120f9f873db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        location: "ApprovalPanel.tsx:handleSendPDF",
+        message: "handleSendPDF started",
+        data: { clientEmail, internalEmail, hasClient: !!clientEmail, hasInternal: !!internalEmail },
+        timestamp: Date.now(),
+        sessionId: "debug-session",
+        hypothesisId: "H4",
+      }),
+    }).catch(() => {});
+    // #endregion
+    if (!clientEmail.trim()) {
+      toast.error(
+        "Client email is not set for this project. Add it in project settings (Client information) before sending.",
+      );
+      return;
+    }
+    if (!internalEmail.trim()) {
+      toast.error(
+        "Internal team email is not set for this project. Add it in project settings (Client information) before sending.",
+      );
+      return;
+    }
     try {
       const { teamBlob, clientBlob } = await generatePDFBlobs();
       const projectName =
@@ -179,24 +225,16 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       ];
 
       await sendEmail({
-        to: project?.latestProjectVersion?.client?.clientEmail ?? "",
-        cc:
-          project?.latestProjectVersion?.client?.clientCCEmails
-            ?.split(",")
-            .map((email) => email.trim())
-            .filter((email) => email.length > 0) ?? [],
+        to: clientEmail,
+        cc: clientCC,
         subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString()}`,
         emailProps: { toClient: true, clientName: "Vali" },
         attachments: clientAttachments,
       });
 
       await sendEmail({
-        to: project?.latestProjectVersion?.client?.internalEmail ?? "",
-        cc:
-          project?.latestProjectVersion?.client?.internalCCEmails
-            ?.split(",")
-            .map((email) => email.trim())
-            .filter((email) => email.length > 0) ?? [],
+        to: internalEmail,
+        cc: internalCC,
         subject: `Progress Report | ${projectName} | ${new Date().toLocaleDateString()}`,
         emailProps: { toClient: false },
         attachments: teamAttachments,
@@ -204,6 +242,20 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
 
       toast.success("PDF generated and sent to client and team successfully");
     } catch (error) {
+      // #region agent log
+      fetch("http://127.0.0.1:7243/ingest/a29a5f74-0241-4040-b26d-3120f9f873db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location: "ApprovalPanel.tsx:handleSendPDF",
+          message: "handleSendPDF error",
+          data: { errorMessage: error instanceof Error ? error.message : String(error) },
+          timestamp: Date.now(),
+          sessionId: "debug-session",
+          hypothesisId: "H5",
+        }),
+      }).catch(() => {});
+      // #endregion
       console.error("PDF generation failed:", error);
       toast.error("PDF generation failed. Please try again.");
     }
