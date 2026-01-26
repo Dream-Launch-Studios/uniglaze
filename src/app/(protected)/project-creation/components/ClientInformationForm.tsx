@@ -160,6 +160,9 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary text-xs">
+                    Keep only 1 email address here.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -206,6 +209,9 @@ const ClientInformationForm: React.FC<ClientInformationFormProps> = ({
                       className="border-border focus:ring-primary focus:border-transparent"
                     />
                   </FormControl>
+                  <p className="text-text-secondary text-xs">
+                    Keep only 1 email address here.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

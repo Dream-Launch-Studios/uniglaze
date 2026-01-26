@@ -1,0 +1,2 @@
+{"location":"ApprovalPanel.tsx:handleSendPDF","message":"handleSendPDF started","data":{"clientEmail":"vishwanath@uniglaze.in","internalEmail":"santhoshkumar@uniglaze.in","hasClient":true,"hasInternal":true},"timestamp":1769450096255,"sessionId":"debug-session","hypothesisId":"H4"}
+{"location":"ApprovalPanel.tsx:handleSendPDF","message":"handleSendPDF started","data":{"clientEmail":"santhoshkumar@uniglaze.in","internalEmail":"santhoshkumar@uniglaze.in","hasClient":true,"hasInternal":true},"timestamp":1769450687176,"sessionId":"debug-session","hypothesisId":"H4"}
