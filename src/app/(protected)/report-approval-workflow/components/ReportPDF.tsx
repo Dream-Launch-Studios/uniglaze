@@ -62,6 +62,17 @@ const styles = StyleSheet.create({
   headerNumber: { width: "7%", padding: 3, fontSize: 8, fontWeight: "bold" },
   headerDate: { width: "8%", padding: 3, fontSize: 8, fontWeight: "bold" },
   headerPercent: { width: "5%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  // Column width styles for Sheet 2 (10 columns) - total must equal 100%
+  cellSheet2MainTask: { width: "15%", padding: 3, fontSize: 8 },
+  cellSheet2SubTask: { width: "15%", padding: 3, fontSize: 8 },
+  cellSheet2Unit: { width: "5%", padding: 3, fontSize: 8 },
+  cellSheet2Number: { width: "8%", padding: 3, fontSize: 8 },
+  cellSheet2Percent: { width: "6%", padding: 3, fontSize: 8 },
+  headerSheet2MainTask: { width: "15%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerSheet2SubTask: { width: "15%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerSheet2Unit: { width: "5%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerSheet2Number: { width: "8%", padding: 3, fontSize: 8, fontWeight: "bold" },
+  headerSheet2Percent: { width: "6%", padding: 3, fontSize: 8, fontWeight: "bold" },
   page: {
     flexDirection: "column",
     backgroundColor: "#ffffff",
@@ -374,36 +385,36 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
           <Text style={styles.sectionTitle}>Sheet 2</Text>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <Text style={styles.headerCell}>Main Task</Text>
-              <Text style={styles.headerCell}>Sub Task</Text>
-              <Text style={styles.headerCell}>Unit</Text>
-              <Text style={styles.headerCell}>Total Qty</Text>
-              <Text style={styles.headerCell}>Total Supplied</Text>
-              <Text style={styles.headerCell}>Total Installed</Text>
-              <Text style={styles.headerCell}>Y&apos;day Installed</Text>
-              <Text style={styles.headerCell}>Y&apos;day Supplied</Text>
-              <Text style={styles.headerCell}>% Installed</Text>
-              <Text style={styles.headerCell}>% Supplied</Text>
+              <Text style={styles.headerSheet2MainTask}>Main Task</Text>
+              <Text style={styles.headerSheet2SubTask}>Sub Task</Text>
+              <Text style={styles.headerSheet2Unit}>Unit</Text>
+              <Text style={styles.headerSheet2Number}>Total Qty</Text>
+              <Text style={styles.headerSheet2Number}>Total Supplied</Text>
+              <Text style={styles.headerSheet2Number}>Total Installed</Text>
+              <Text style={styles.headerSheet2Number}>Y&apos;day Installed</Text>
+              <Text style={styles.headerSheet2Number}>Y&apos;day Supplied</Text>
+              <Text style={styles.headerSheet2Percent}>% Installed</Text>
+              <Text style={styles.headerSheet2Percent}>% Supplied</Text>
             </View>
             {latest?.sheet1?.flatMap((item, idx) =>
               (item.sheet2 ?? []).map((sub, sidx) => (
                 <View key={`${idx}-${sidx}`} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{item.itemName}</Text>
-                  <Text style={styles.tableCell}>{sub.subItemName}</Text>
-                  <Text style={styles.tableCell}>{sub.unit}</Text>
-                  <Text style={styles.tableCell}>{sub.totalQuantity}</Text>
-                  <Text style={styles.tableCell}>{sub.totalSupplied}</Text>
-                  <Text style={styles.tableCell}>{sub.totalInstalled}</Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2MainTask}>{item.itemName}</Text>
+                  <Text style={styles.cellSheet2SubTask}>{sub.subItemName}</Text>
+                  <Text style={styles.cellSheet2Unit}>{sub.unit}</Text>
+                  <Text style={styles.cellSheet2Number}>{sub.totalQuantity}</Text>
+                  <Text style={styles.cellSheet2Number}>{sub.totalSupplied}</Text>
+                  <Text style={styles.cellSheet2Number}>{sub.totalInstalled}</Text>
+                  <Text style={styles.cellSheet2Number}>
                     {sub.yesterdayProgressReport?.yesterdayInstalled ?? "-"}
                   </Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2Number}>
                     {sub.yesterdayProgressReport?.yesterdaySupplied ?? "-"}
                   </Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2Percent}>
                     {Math.min(sub.percentInstalled, 100)}%
                   </Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2Percent}>
                     {Math.min(sub.percentSupplied, 100)}%
                   </Text>
                 </View>
@@ -980,36 +991,36 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
           <Text style={styles.sectionTitle}>Sheet 2</Text>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <Text style={styles.headerCell}>Main Task</Text>
-              <Text style={styles.headerCell}>Sub Task</Text>
-              <Text style={styles.headerCell}>Unit</Text>
-              <Text style={styles.headerCell}>Total Qty</Text>
-              <Text style={styles.headerCell}>Total Supplied</Text>
-              <Text style={styles.headerCell}>Total Installed</Text>
-              <Text style={styles.headerCell}>Y&apos;day Installed</Text>
-              <Text style={styles.headerCell}>Y&apos;day Supplied</Text>
-              <Text style={styles.headerCell}>% Installed</Text>
-              <Text style={styles.headerCell}>% Supplied</Text>
+              <Text style={styles.headerSheet2MainTask}>Main Task</Text>
+              <Text style={styles.headerSheet2SubTask}>Sub Task</Text>
+              <Text style={styles.headerSheet2Unit}>Unit</Text>
+              <Text style={styles.headerSheet2Number}>Total Qty</Text>
+              <Text style={styles.headerSheet2Number}>Total Supplied</Text>
+              <Text style={styles.headerSheet2Number}>Total Installed</Text>
+              <Text style={styles.headerSheet2Number}>Y&apos;day Installed</Text>
+              <Text style={styles.headerSheet2Number}>Y&apos;day Supplied</Text>
+              <Text style={styles.headerSheet2Percent}>% Installed</Text>
+              <Text style={styles.headerSheet2Percent}>% Supplied</Text>
             </View>
             {latest?.sheet1?.flatMap((item, idx) =>
               (item.sheet2 ?? []).map((sub, sidx) => (
                 <View key={`${idx}-${sidx}`} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{item.itemName}</Text>
-                  <Text style={styles.tableCell}>{sub.subItemName}</Text>
-                  <Text style={styles.tableCell}>{sub.unit}</Text>
-                  <Text style={styles.tableCell}>{sub.totalQuantity}</Text>
-                  <Text style={styles.tableCell}>{sub.totalSupplied}</Text>
-                  <Text style={styles.tableCell}>{sub.totalInstalled}</Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2MainTask}>{item.itemName}</Text>
+                  <Text style={styles.cellSheet2SubTask}>{sub.subItemName}</Text>
+                  <Text style={styles.cellSheet2Unit}>{sub.unit}</Text>
+                  <Text style={styles.cellSheet2Number}>{sub.totalQuantity}</Text>
+                  <Text style={styles.cellSheet2Number}>{sub.totalSupplied}</Text>
+                  <Text style={styles.cellSheet2Number}>{sub.totalInstalled}</Text>
+                  <Text style={styles.cellSheet2Number}>
                     {sub.yesterdayProgressReport?.yesterdayInstalled ?? "-"}
                   </Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2Number}>
                     {sub.yesterdayProgressReport?.yesterdaySupplied ?? "-"}
                   </Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2Percent}>
                     {Math.min(sub.percentInstalled, 100)}%
                   </Text>
-                  <Text style={styles.tableCell}>
+                  <Text style={styles.cellSheet2Percent}>
                     {Math.min(sub.percentSupplied, 100)}%
                   </Text>
                 </View>
