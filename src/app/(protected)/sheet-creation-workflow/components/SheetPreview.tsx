@@ -174,10 +174,46 @@ const SheetPreview: React.FC<SheetPreviewProps> = ({
                 <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
                   Installation Target Date
                 </th>
+                <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                  Per Day Supply Productivity
+                </th>
+                <th className="text-text-secondary px-4 py-3 text-left text-sm font-medium">
+                  Per Day Install Productivity
+                </th>
               </tr>
             </thead>
             <tbody className="divide-border divide-y">
-              {sheet1Data?.map((item: ProjectItem, index: number) => (
+              {sheet1Data?.map((item: ProjectItem, index: number) => {
+                // Calculate remaining days from target date to current date
+                const calculateRemainingDays = (targetDate: string | Date | null | undefined): number => {
+                  if (!targetDate) return 0;
+                  const target = new Date(targetDate);
+                  const currentDate = new Date();
+                  if (isNaN(target.getTime())) return 0;
+                  const diffTime = target.getTime() - currentDate.getTime();
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  return Math.max(0, diffDays);
+                };
+
+                // Calculate per-day productivity (one decimal place maximum)
+                const calculatePerDayProductivity = (remaining: number, remainingDays: number): number => {
+                  if (remainingDays <= 0 || remaining <= 0) return 0;
+                  const result = remaining / remainingDays;
+                  return Math.round(result * 10) / 10;
+                };
+
+                const remainingDaysSupply = calculateRemainingDays(item.supplyTargetDate);
+                const remainingDaysInstall = calculateRemainingDays(item.installationTargetDate);
+                const perDaySupplyProductivity = calculatePerDayProductivity(
+                  item.yetToSupply ?? 0,
+                  remainingDaysSupply,
+                );
+                const perDayInstallProductivity = calculatePerDayProductivity(
+                  item.yetToInstall ?? 0,
+                  remainingDaysInstall,
+                );
+
+                return (
                 <tr key={index} className="hover:bg-muted/20">
                   <td className="text-text-primary px-4 py-3 text-sm">
                     {index + 1}
@@ -239,8 +275,19 @@ const SheetPreview: React.FC<SheetPreviewProps> = ({
                       ? new Date(item.installationTargetDate).toLocaleDateString()
                       : "N/A"}
                   </td>
+                  <td className="text-text-primary px-4 py-3 text-sm font-medium">
+                    {perDaySupplyProductivity > 0
+                      ? perDaySupplyProductivity.toFixed(1)
+                      : "N/A"}
+                  </td>
+                  <td className="text-text-primary px-4 py-3 text-sm font-medium">
+                    {perDayInstallProductivity > 0
+                      ? perDayInstallProductivity.toFixed(1)
+                      : "N/A"}
+                  </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

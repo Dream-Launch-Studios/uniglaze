@@ -320,12 +320,12 @@ const MasterDataTable: React.FC<MasterDataTableProps> = ({
                 </td>
                 <td className="text-text-secondary p-3">
                   {row.perDaySupplyTarget !== undefined && row.perDaySupplyTarget > 0
-                    ? row.perDaySupplyTarget
+                    ? row.perDaySupplyTarget.toFixed(1)
                     : "N/A"}
                 </td>
                 <td className="text-text-secondary p-3">
                   {row.perDayInstallTarget !== undefined && row.perDayInstallTarget > 0
-                    ? row.perDayInstallTarget
+                    ? row.perDayInstallTarget.toFixed(1)
                     : "N/A"}
                 </td>
                 <td className="p-3">

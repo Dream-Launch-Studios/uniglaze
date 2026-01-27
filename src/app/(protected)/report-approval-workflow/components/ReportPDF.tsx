@@ -276,8 +276,9 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
   };
 
   const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
-    if (remainingDays <= 0) return 0;
-    return Math.round(balance / remainingDays);
+    if (remainingDays <= 0 || balance <= 0) return 0;
+    const result = balance / remainingDays;
+    return Math.round(result * 10) / 10; // Round to one decimal place
   };
 
   const formatTargetDate = (date: string | Date | null | undefined): string => {
@@ -351,10 +352,10 @@ export const ReportTeamPDF: React.FC<ReportPDFProps> = ({ report }) => {
                     {formatTargetDate(item.installationTargetDate)}
                   </Text>
                   <Text style={styles.cellNumber}>
-                    {perDaySupplyTarget > 0 ? perDaySupplyTarget : "N/A"}
+                    {perDaySupplyTarget > 0 ? perDaySupplyTarget.toFixed(1) : "N/A"}
                   </Text>
                   <Text style={styles.cellNumber}>
-                    {perDayInstallTarget > 0 ? perDayInstallTarget : "N/A"}
+                    {perDayInstallTarget > 0 ? perDayInstallTarget.toFixed(1) : "N/A"}
                   </Text>
                   <Text style={styles.cellPercent}>
                     {Math.min(item.percentSupplied, 100)}%
@@ -881,8 +882,9 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
   };
 
   const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
-    if (remainingDays <= 0) return 0;
-    return Math.round(balance / remainingDays);
+    if (remainingDays <= 0 || balance <= 0) return 0;
+    const result = balance / remainingDays;
+    return Math.round(result * 10) / 10; // Round to one decimal place
   };
 
   const formatTargetDate = (date: string | Date | null | undefined): string => {
@@ -956,10 +958,10 @@ export const ReportClientPDF: React.FC<ReportPDFProps> = ({ report }) => {
                     {formatTargetDate(item.installationTargetDate)}
                   </Text>
                   <Text style={styles.cellNumber}>
-                    {perDaySupplyTarget > 0 ? perDaySupplyTarget : "N/A"}
+                    {perDaySupplyTarget > 0 ? perDaySupplyTarget.toFixed(1) : "N/A"}
                   </Text>
                   <Text style={styles.cellNumber}>
-                    {perDayInstallTarget > 0 ? perDayInstallTarget : "N/A"}
+                    {perDayInstallTarget > 0 ? perDayInstallTarget.toFixed(1) : "N/A"}
                   </Text>
                   <Text style={styles.cellPercent}>
                     {Math.min(item.percentSupplied, 100)}%

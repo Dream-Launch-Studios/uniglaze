@@ -138,10 +138,11 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
     return Math.max(0, diffDays); // Return 0 if target date is in the past
   };
 
-  // Calculate per-day target (rounded to whole number)
+  // Calculate per-day productivity (one decimal place maximum)
   const calculatePerDayTarget = (balance: number, remainingDays: number): number => {
-    if (remainingDays <= 0) return 0;
-    return Math.round(balance / remainingDays);
+    if (remainingDays <= 0 || balance <= 0) return 0;
+    const result = balance / remainingDays;
+    return Math.round(result * 10) / 10; // Round to one decimal place
   };
 
   const handleSave = async (): Promise<void> => {
@@ -444,10 +445,10 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
                           : "N/A"}
                       </TableCell>
                       <TableCell className="text-center">
-                        {perDaySupplyTarget > 0 ? perDaySupplyTarget : "N/A"}
+                        {perDaySupplyTarget > 0 ? perDaySupplyTarget.toFixed(1) : "N/A"}
                       </TableCell>
                       <TableCell className="text-center">
-                        {perDayInstallTarget > 0 ? perDayInstallTarget : "N/A"}
+                        {perDayInstallTarget > 0 ? perDayInstallTarget.toFixed(1) : "N/A"}
                       </TableCell>
                       <TableCell className="text-center">
                         {Math.min(item.percentSupplied, 100)}%
