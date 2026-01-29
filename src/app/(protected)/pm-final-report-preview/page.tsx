@@ -105,7 +105,7 @@ const ReportPreview = () => {
       useProjectStore.getState().setProject(projectVersion);
       router.push("/project-manager-daily-workflow");
     } else {
-      toast.error("Failed to create project version");
+      toast.error("Failed to save the report. Check that all required fields are filled correctly and that quantities don't exceed totals. Try again or contact support.");
     }
   };
 

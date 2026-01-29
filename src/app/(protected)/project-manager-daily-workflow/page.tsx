@@ -224,7 +224,7 @@ const ProjectManagerDailyWorkflow: React.FC = () => {
       // resetProject();
       router.push("/pm-final-report-preview");
     } else {
-      toast.error("Failed to create project version");
+      toast.error("Failed to save the daily report. Check that all required fields are filled correctly and that quantities don't exceed totals. Try again or contact support.");
     }
   };
 

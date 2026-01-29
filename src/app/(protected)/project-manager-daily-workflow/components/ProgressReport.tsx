@@ -101,6 +101,7 @@ const ProgressReport = ({
       setIsAddingProgressReport(false);
     } catch (error) {
       console.error("Error creating project:", error);
+      toast.error("Failed to save progress report. Check that all required fields are filled correctly and try again. If the problem continues, contact support.");
       setIsLoading(false);
     }
   }

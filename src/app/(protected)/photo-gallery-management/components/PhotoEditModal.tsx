@@ -116,6 +116,7 @@ const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
       onClose();
     } catch (error) {
       console.error("Failed to save photo metadata:", error);
+      toast.error("Failed to save photo details. Check your internet connection and try again. If the problem continues, contact support.");
     } finally {
       setIsSaving(false);
     }

@@ -153,7 +153,7 @@ export const projectRouter = createTRPCRouter({
     } catch (error) {
       return {
         success: false,
-        message: "Failed to fetch project managers",
+        message: "Failed to load project managers. Check your internet connection and try refreshing the page.",
         data: [],
       };
     }
@@ -210,7 +210,7 @@ export const projectRouter = createTRPCRouter({
             const latest = project.projectVersions[0] as unknown as z.infer<
               typeof projectVersionSchema
             >;
-            if (!latest) throw new Error("Latest project version not found");
+            if (!latest) throw new Error("Project data is incomplete. The project exists but has no version data. Please contact support.");
 
             // Convert all project documents to signed URLs
             const s3Keys = latest.projectDocuments.map(
@@ -283,7 +283,7 @@ export const projectRouter = createTRPCRouter({
       console.log("##########################################################");
       return {
         success: false,
-        message: "Failed to fetch projects",
+        message: "Failed to load projects. Check your internet connection and try refreshing the page. If the problem continues, contact support.",
         data: [],
       };
     }
@@ -325,7 +325,7 @@ export const projectRouter = createTRPCRouter({
       } catch (error) {
         return {
           success: false,
-          message: "Failed to fetch projects assigned to project manager",
+          message: "Failed to load your assigned projects. Check your internet connection and try refreshing the page.",
           data: [],
         };
       }
@@ -341,7 +341,7 @@ export const projectRouter = createTRPCRouter({
           ctx.session.user.customRole !== Role.MANAGING_DIRECTOR &&
           ctx.session.user.customRole !== Role.HEAD_OF_PLANNING
         ) {
-          throw new Error("You do not have permission to delete projects");
+          throw new Error("You don't have permission to delete projects. Only Managing Directors and Head of Planning can delete projects.");
         }
 
         // Check if project exists and was created by the user or user is MD
@@ -353,7 +353,7 @@ export const projectRouter = createTRPCRouter({
         });
 
         if (!project) {
-          throw new Error("Project not found");
+          throw new Error("Project not found. The project may have been deleted or the ID is incorrect.");
         }
 
         // Only allow deletion if user created it or is MD
@@ -361,7 +361,7 @@ export const projectRouter = createTRPCRouter({
           project.createdById !== ctx.session.user.id &&
           ctx.session.user.customRole !== Role.MANAGING_DIRECTOR
         ) {
-          throw new Error("You can only delete projects you created");
+          throw new Error("You can only delete projects that you created. If you need to delete someone else's project, contact a Managing Director.");
         }
 
         // Delete all project versions first (due to foreign key constraint)
@@ -382,7 +382,7 @@ export const projectRouter = createTRPCRouter({
         return {
           success: false,
           message:
-            error instanceof Error ? error.message : "Failed to delete project",
+            error instanceof Error ? error.message : "Failed to delete project. Check your permissions and try again. If the problem continues, contact support.",
         };
       }
     }),
@@ -465,7 +465,7 @@ export const projectRouter = createTRPCRouter({
           message:
             error instanceof Error
               ? error.message
-              : "Failed to fetch project versions",
+              : "Failed to load project history. Check your internet connection and try refreshing the page.",
           data: [],
         };
       }

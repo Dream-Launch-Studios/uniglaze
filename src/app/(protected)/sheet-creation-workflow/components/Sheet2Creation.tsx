@@ -76,8 +76,8 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
   }, [selectedItem, sheet1, isHydrated]);
 
   const validateSubTask = (subTask: NewSubTaskForm): string | null => {
-    if (!subTask.subItemName.trim()) return "Sub-task name is required";
-    if (!subTask.unit.trim()) return "Unit is required";
+    if (!subTask.subItemName.trim()) return "Sub-task name is required. Enter the name of this sub-task (e.g. North Face Installation, Glass Panel Supply).";
+    if (!subTask.unit.trim()) return "Unit is required. Enter the unit of measurement (e.g. sqm, units, pieces).";
     return null;
   };
 
@@ -93,7 +93,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
         (subTask) => subTask.subItemName === newSubTask.subItemName,
       )
     ) {
-      alert("Sub-task already exists");
+      alert(`Sub-task "${newSubTask.subItemName}" already exists for this main task. Use a different name or edit the existing sub-task.`);
       return;
     }
 
@@ -126,7 +126,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
             subTask.subItemName !== newSubTask.subItemName,
         ).length > 0
       ) {
-        toast.error("Only one sub-task can be connected to Sheet 1");
+        toast.error("Only one sub-task can be connected to Sheet 1 per main task. Unlink the existing connected sub-task first, or don't connect this one.");
         return;
       }
     }
@@ -219,7 +219,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
       selectedItem !== null &&
       newSubTask.totalQuantity !== sheet1?.[selectedItem]?.totalQuantity
     ) {
-      alert("Total quantity cannot be different from the main task");
+      alert(`When linking to Sheet 1, the sub-task total quantity (${newSubTask.totalQuantity}) must match the main task total quantity (${sheet1?.[selectedItem]?.totalQuantity}). Update the quantity to match.`);
       return;
     }
 
@@ -236,7 +236,7 @@ const Sheet2Creation: React.FC<Sheet2CreationProps> = ({
             subTask.subItemName !== newSubTask.subItemName,
         ).length > 0
       ) {
-        toast.error("Only one sub-task can be connected to Sheet 1");
+        toast.error("Only one sub-task can be connected to Sheet 1 per main task. Unlink the existing connected sub-task first, or don't connect this one.");
         return;
       }
     }

@@ -128,26 +128,26 @@ const Sheet1Creation: React.FC<Sheet1CreationProps> = ({ onNext, error }) => {
   };
 
   const validateItem = (item: NewItemForm): string | null => {
-    if (!item.itemName.trim()) return "Item name is required";
-    if (!item.unit.trim()) return "UOM is required";
+    if (!item.itemName.trim()) return "Item name is required. Enter the name of the item (e.g. UCW, Glass Panels).";
+    if (!item.unit.trim()) return "Unit of measurement (UOM) is required. Enter the unit (e.g. sqm, units, pieces).";
     if (!item.totalQuantity || item.totalQuantity <= 0)
-      return "Total quantity must be greater than 0";
+      return "Total quantity must be greater than 0. Enter how many units you need in total.";
     if (item.totalSupplied && item.totalSupplied < 0)
-      return "Cumulative supplied cannot be negative";
+      return "Cumulative supplied cannot be negative. Enter 0 or a positive number.";
     if (item.totalInstalled && item.totalInstalled < 0)
-      return "Cumulative installed cannot be negative";
+      return "Cumulative installed cannot be negative. Enter 0 or a positive number.";
     if (
       item.totalQuantity &&
       item.totalSupplied &&
       item.totalSupplied > item.totalQuantity
     )
-      return "Cumulative supplied cannot exceed total";
+      return `Cumulative supplied (${item.totalSupplied}) cannot exceed total quantity (${item.totalQuantity}). Reduce the supplied amount or increase total quantity.`;
     if (
       item.totalQuantity &&
       item.totalInstalled &&
       item.totalInstalled > item.totalQuantity
     )
-      return "Cumulative installed cannot exceed total";
+      return `Cumulative installed (${item.totalInstalled}) cannot exceed total quantity (${item.totalQuantity}). Reduce the installed amount or increase total quantity.`;
     return null;
   };
 

@@ -225,7 +225,7 @@ const SupplyInstallDataStep: React.FC<SupplyInstallDataStepProps> = ({
                       )
                     }
                     placeholder="Enter installed quantity"
-                    error={hasError ? "Cannot exceed supplied quantity" : false}
+                    error={hasError ? `Installed quantity (${installedTillNow}) cannot exceed supplied quantity (${suppliedTillNow}). You can only install what has been supplied. Reduce the installed amount or increase supplied quantity first.` : false}
                     required
                   />
                 </div>

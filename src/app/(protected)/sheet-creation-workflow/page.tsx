@@ -196,6 +196,7 @@ const SheetCreationWorkflow: React.FC = () => {
       });
     } catch (error) {
       console.error("Error creating project:", error);
+      toast.error("Failed to finalize project. Check that all required fields in Sheet 1 and Sheet 2 are filled correctly and try again. If the problem continues, contact support.");
       setIsLoading(false);
     }
   };

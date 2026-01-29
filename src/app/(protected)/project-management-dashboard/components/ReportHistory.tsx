@@ -123,7 +123,7 @@ const ReportHistory: React.FC<ReportHistoryProps> = ({ projectId }) => {
   const generatePDF = async (versionId: number, type: "client" | "internal"): Promise<void> => {
     const version = historicalData?.data?.find((v) => v.id === versionId);
     if (!version) {
-      toast.error("Report data not found");
+      toast.error("Report data not found. The report may have been deleted or you don't have access. Refresh the page or contact support.");
       return;
     }
 
@@ -174,7 +174,7 @@ const ReportHistory: React.FC<ReportHistoryProps> = ({ projectId }) => {
       toast.success(`${type === "client" ? "Client" : "Internal"} report downloaded`);
     } catch (error) {
       console.error("PDF generation failed:", error);
-      toast.error("Failed to generate PDF. If download doesn't start, please refresh the tab and try again.", {
+      toast.error("Failed to generate PDF. Check your browser's download settings, refresh the page, and try again. If the problem continues, contact support.", {
         duration: 5000,
       });
     } finally {

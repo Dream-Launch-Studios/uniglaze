@@ -39,10 +39,10 @@ import {
 } from "../ui/select";
 
 const formSchema = z.object({
-  username: z.string().min(3),
-  email: z.email(),
-  password: z.string().min(8),
-  customRole: z.enum(Role),
+  username: z.string().min(3, "Username must be at least 3 characters long"),
+  email: z.email("Please enter a valid email address (e.g. user@example.com)"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  customRole: z.enum(Role, { message: "Please select a role for this user" }),
 });
 
 export function SignupForm({

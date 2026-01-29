@@ -34,8 +34,8 @@ import { APP_PATHS } from "@/config/path.config";
 import Image from "next/image";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: z.string().email("Please enter a valid email address (e.g. user@example.com)"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
 });
 
 export function LoginForm({

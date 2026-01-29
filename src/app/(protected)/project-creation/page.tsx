@@ -159,7 +159,7 @@ const ProjectCreation: React.FC = () => {
   const handleDeleteProject = async (): Promise<void> => {
     const projectId = project.latestProjectVersion?.projectId;
     if (!projectId) {
-      toast.error("Project ID not found");
+      toast.error("Project ID is missing. Please go back and create a project first, or refresh the page.");
       return;
     }
     await deleteProject({ projectId });
@@ -367,7 +367,7 @@ const ProjectCreation: React.FC = () => {
         });
 
         if (!updatedProject) {
-          toast.error("Failed to update project");
+          toast.error("Failed to update project. Check that all required fields are filled correctly and try again. If the problem continues, contact support.");
           setIsLoading(false);
           return;
         }
@@ -388,7 +388,7 @@ const ProjectCreation: React.FC = () => {
         });
 
         if (!newProject) {
-          toast.error("Failed to create project");
+          toast.error("Failed to create project. Check that all required fields (marked with *) are filled correctly and try again. If the problem continues, contact support.");
           setIsLoading(false);
           return;
         }
@@ -397,6 +397,7 @@ const ProjectCreation: React.FC = () => {
       }
     } catch (error) {
       console.error("Error creating project:", error);
+      toast.error("An unexpected error occurred while creating the project. Please check all fields are correct and try again. If the problem continues, contact support.");
       setIsLoading(false);
     }
   }

@@ -62,21 +62,21 @@ const ItemForm = ({
             `suppliedYesterday${i}`,
             z.coerce
               .number()
-              .min(0, "Supplied yesterday cannot be negative")
+              .min(0, "Supplied yesterday cannot be negative. Enter 0 or a positive number.")
               .max(
                 remainingSupply,
-                `Supplied yesterday + current supplied cannot exceed total (${remainingSupply} remaining)`,
+                `You can only supply ${remainingSupply} more units. Current supplied (${currentSupplied}) + yesterday's supply cannot exceed total quantity (${totalQuantity}). Reduce yesterday's supply amount.`,
               ),
           ],
           [
             `installedYesterday${i}`,
             z.coerce
               .number()
-              .min(0, "Installed yesterday cannot be negative")
+              .min(0, "Installed yesterday cannot be negative. Enter 0 or a positive number.")
               .max(
                 remainingInstall,
-                `Installed yesterday + current installed cannot exceed total (${remainingInstall} remaining)`,
-    ),
+                `You can only install ${remainingInstall} more units. Current installed (${currentInstalled}) + yesterday's installation cannot exceed total quantity (${totalQuantity}). Reduce yesterday's installation amount.`,
+              ),
           ],
         ];
       }),
@@ -138,7 +138,7 @@ const ItemForm = ({
       form.reset();
     } catch (error) {
       console.error("Error creating project:", error);
-      toast.error("Failed to save progress. Please try again.");
+      toast.error("Failed to save yesterday's progress. Check your internet connection and try again. If the problem continues, contact support.");
       setIsLoading(false);
     }
   }

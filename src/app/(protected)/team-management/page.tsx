@@ -47,9 +47,9 @@ import { useRouter } from "next/navigation";
 import type { Session } from "@/server/auth";
 
 const userSchema = z.object({
-  name: z.string().min(2, "Required"),
-  password: z.string().min(8, "Minimum 8 characters"),
-  email: z.email("Invalid email"),
+  name: z.string().min(2, "Name is required. Enter at least 2 characters (e.g. John Doe)."),
+  password: z.string().min(8, "Password must be at least 8 characters long for security."),
+  email: z.email("Please enter a valid email address (e.g. user@example.com)."),
   customRole: z.enum(Role),
 });
 
@@ -104,7 +104,8 @@ export default function UsersPage() {
       else toast.error(res.message);
       window.location.reload();
     } catch (error) {
-      toast.error((error as Error).message);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(errorMessage || "Failed to delete user. Check your permissions and try again. If the problem continues, contact support.");
     }
   };
 
@@ -114,14 +115,15 @@ export default function UsersPage() {
         newPassword: values.password, // required
         userId: id, // required
       });
-      if (error) toast.error(error.message ?? "Password update failed");
+      if (error) toast.error(error.message ?? "Failed to update password. Make sure the password is at least 8 characters and try again.");
       else toast.success("Password updated successfully");
       const res = await updateUserMetadata(id, values);
       if (res.success) toast.success(res.message);
       else toast.error(res.message);
       window.location.reload();
     } catch (error) {
-      toast.error((error as Error).message);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(errorMessage || "Failed to delete user. Check your permissions and try again. If the problem continues, contact support.");
     }
   };
 

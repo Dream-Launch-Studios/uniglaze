@@ -135,6 +135,7 @@ const PhotoDocumentationStep: React.FC<PhotoDocumentationStepProps> = ({
         setUploadingPhotos((prev) => prev.filter((p) => p.file !== file));
       } catch (error) {
         console.error("Error uploading photo:", error);
+        toast.error(`Failed to upload photo "${file.name}". Check your internet connection and file size (max 10MB). Try again.`);
         setUploadingPhotos((prev) => prev.filter((p) => p.file !== file));
       }
     }

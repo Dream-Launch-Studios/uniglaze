@@ -49,6 +49,7 @@ const CloseBlockageModal: React.FC<CloseBlockageModalProps> = ({
       onClose();
     } catch (error) {
       console.error("Error closing blockage:", error);
+      toast.error("Failed to close blockage. Make sure you've entered closure remarks and try again. If the problem continues, contact support.");
     } finally {
       setIsSubmitting(false);
     }

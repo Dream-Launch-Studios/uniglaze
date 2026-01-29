@@ -94,7 +94,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
 
   const ensureProjectContext = (): void => {
     if (!project?.latestProjectVersion) {
-      throw new Error("No project context available for PDF generation");
+      throw new Error("Cannot generate PDF: No project data found. Please select a project first.");
     }
   };
 
@@ -103,7 +103,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
     clientBlob: Blob;
   }> => {
     if (!report) {
-      throw new Error("Missing report data");
+      throw new Error("Cannot generate PDF: Report data is missing. Please ensure the report is loaded correctly.");
     }
     ensureProjectContext();
 
@@ -152,7 +152,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       toast.success("PDFs downloaded");
     } catch (error) {
       console.error("PDF download failed:", error);
-      toast.error("Failed to download PDFs. Try again.");
+      toast.error("Failed to download PDFs. Check your browser's download settings or try refreshing the page. If the problem continues, contact support.");
     } finally {
       setIsDownloading(false);
     }
@@ -257,7 +257,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       }).catch(() => {});
       // #endregion
       console.error("PDF generation failed:", error);
-      toast.error("PDF generation failed. Please try again.");
+      toast.error("Failed to generate and send PDFs. Check that client and internal email addresses are set in project settings, and that your internet connection is working. Try again or contact support.");
     }
   };
 
@@ -266,7 +266,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       (action === "request-changes" || action === "reject") &&
       !comment.trim()
     ) {
-      toast.error("Comment is required for this action");
+      toast.error("Comment is required. Please explain why you are requesting changes or rejecting this report.");
       return;
     }
 
@@ -292,6 +292,8 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
       setRefreshKey((prev) => prev + 1); // Force rerender
     } catch (error) {
       console.error("Action failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(errorMessage || "Failed to process your action. Check that all required fields are filled and try again. If the problem continues, contact support.");
     } finally {
       setIsSubmitting(false);
       setSelectedAction(null);
@@ -459,7 +461,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
               disabled={isSubmitting || !comment.trim()}
               onClick={() => {
                 if (!comment.trim()) {
-                  toast.error("Comment is required for this action");
+                  toast.error("Comment is required. Please explain why you are requesting changes or rejecting this report.");
                   return;
                 }
                 void handleAction("reject");

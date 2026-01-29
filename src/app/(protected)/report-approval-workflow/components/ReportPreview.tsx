@@ -166,6 +166,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
       });
     } catch (error) {
       console.error("Error saving report:", error);
+      toast.error("Failed to save report changes. Check your internet connection and that all data is valid. Try again or contact support.");
       setIsSaving(false);
     }
   };

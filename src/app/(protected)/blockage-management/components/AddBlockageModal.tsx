@@ -111,14 +111,14 @@ const AddBlockageModal: React.FC<AddBlockageModalProps> = ({
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
 
-    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.title.trim()) newErrors.title = "Blockage title is required. Enter a brief title describing the blockage (e.g. Material Delivery Delay, Weather Issue).";
     if (!formData.description.trim())
-      newErrors.description = "Description is required";
-    if (!formData.category) newErrors.category = "Category is required";
-    if (!formData.severity) newErrors.severity = "Severity is required";
-    if (!formData.project) newErrors.project = "Project is required";
-    if (!formData.location.trim()) newErrors.location = "Location is required";
-    if (!formData.assignedTo) newErrors.assignedTo = "Assignee is required";
+      newErrors.description = "Blockage description is required. Explain what the blockage is and how it affects the project.";
+    if (!formData.category) newErrors.category = "Category is required. Select the type of blockage (e.g. Material Delivery Delay, Weather Issue).";
+    if (!formData.severity) newErrors.severity = "Severity level is required. Select how critical this blockage is (Low, Medium, or High).";
+    if (!formData.project) newErrors.project = "Project is required. Select which project this blockage affects.";
+    if (!formData.location.trim()) newErrors.location = "Location is required. Enter where this blockage is occurring (e.g. Building A - Floor 5, Site Entrance).";
+    if (!formData.assignedTo) newErrors.assignedTo = "Assignee is required. Select who is responsible for resolving this blockage.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

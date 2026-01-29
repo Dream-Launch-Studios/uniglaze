@@ -933,7 +933,7 @@ const Dashboard: React.FC = () => {
                                 setProject(foundProject);
                                 router.push(`/project-creation?edit=${true}`);
                               } else {
-                                toast.error("Project not found");
+                                toast.error("Project not found. The project may have been deleted or you don't have access. Refresh the page or contact support.");
                               }
                             }
                           }}

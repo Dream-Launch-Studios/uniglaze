@@ -548,7 +548,7 @@ const BlockageManagement: React.FC = () => {
       );
 
       if (!project) {
-        toast.error("Project not found");
+        toast.error("Project not found. The project may have been deleted or you don't have access. Refresh the page or contact support.");
         return;
       }
 
@@ -641,7 +641,7 @@ const BlockageManagement: React.FC = () => {
       setBlockages(bs.filter((b) => b !== undefined));
     } catch (error) {
       console.error("Error closing blockage:", error);
-      toast.error("Failed to close blockage");
+      toast.error("Failed to close blockage. Make sure you've entered closure remarks and try again. If the problem continues, contact support.");
     }
   };
 
@@ -652,7 +652,7 @@ const BlockageManagement: React.FC = () => {
 
   const handleExportBlockages = (): void => {
     if (!blockages || blockages.length === 0) {
-      toast.error("No blockages to export");
+      toast.error("No blockages to export. Add at least one blockage before exporting.");
       return;
     }
 
