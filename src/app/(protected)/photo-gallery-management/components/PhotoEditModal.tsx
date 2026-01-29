@@ -5,6 +5,7 @@ import Input from "@/components/rocket/components/ui/Input";
 import Select from "@/components/rocket/components/ui/Select";
 import type { SelectOption } from "@/components/rocket/components/ui/Select";
 import Image from "next/image";
+import { toast } from "sonner";
 
 // Types
 interface PhotoLocation {

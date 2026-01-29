@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSession } from "@/lib/auth-client";
 import type { Session } from "@/server/auth";
+import { toast } from "sonner";
 
 interface CloseBlockageModalProps {
   isOpen: boolean;
