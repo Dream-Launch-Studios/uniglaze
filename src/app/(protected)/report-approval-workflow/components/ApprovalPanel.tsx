@@ -11,6 +11,7 @@ import { ReportClientPDF, ReportTeamPDF } from "./ReportPDF";
 import { sendEmail } from "@/lib/send-email";
 import { useProjectStore } from "@/store/project.store";
 import type { BlockageType } from "@/validators/prisma-schmea.validator";
+import { processReportImages } from "@/lib/pdf-image-utils";
 
 // Types
 interface ReportComment {
@@ -109,8 +110,14 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({
 
     const reportWithProject = {
       ...report,
-      project,
+      project: JSON.parse(JSON.stringify(project)), // Deep clone to avoid mutating original
     };
+
+    // Convert all image URLs to base64 before generating PDFs
+    // This is necessary because @react-pdf/renderer cannot access external URLs
+    // Show a loading message since this might take a moment with many images
+    toast.info("Processing images for PDF...", { duration: 2000 });
+    await processReportImages(reportWithProject);
 
     const [teamBlob, clientBlob] = await Promise.all([
       pdf(<ReportTeamPDF report={reportWithProject} />).toBlob(),

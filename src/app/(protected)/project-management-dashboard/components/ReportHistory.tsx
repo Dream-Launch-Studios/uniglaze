@@ -9,6 +9,7 @@ import { ReportTeamPDF, ReportClientPDF } from "@/app/(protected)/report-approva
 import { useProjectStore } from "@/store/project.store";
 import { toast } from "sonner";
 import type { ReportStatus } from "@prisma/client";
+import { processReportImages } from "@/lib/pdf-image-utils";
 
 interface ReportHistoryProps {
   projectId?: number;
@@ -161,6 +162,11 @@ const ReportHistory: React.FC<ReportHistoryProps> = ({ projectId }) => {
         progressDetails: [],
         project: project as any, // Type assertion since we're constructing from DB data
       } as any;
+
+      // Convert all image URLs to base64 before generating PDF
+      // This is necessary because @react-pdf/renderer cannot access external URLs
+      toast.info("Processing images for PDF...", { duration: 2000 });
+      await processReportImages(report);
 
       const PDFComponent = type === "client" ? ReportClientPDF : ReportTeamPDF;
       const blob = await pdf(<PDFComponent report={report} />).toBlob();
