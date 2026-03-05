@@ -334,19 +334,25 @@ const ProjectCreation: React.FC = () => {
       const result = await getSignedUrl({
         files: validated.data.projectDocuments.map((file) => ({
           filename: file.name,
-          contentType: file.type,
+          contentType: file.type || "application/octet-stream",
           folderName: "project-documents",
         })),
       });
 
       await Promise.all(
-        validated.data.projectDocuments.map((file, i) =>
-          fetch(result[i]!.uploadUrl, {
+        validated.data.projectDocuments.map(async (file, i) => {
+          const res = await fetch(result[i]!.uploadUrl, {
             method: "PUT",
             body: file,
-            headers: { "Content-Type": file.type },
-          }),
-        ),
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+          });
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Upload failed: ${res.status} ${res.statusText} - ${text}`);
+          }
+        }),
       );
 
       if (edit) {

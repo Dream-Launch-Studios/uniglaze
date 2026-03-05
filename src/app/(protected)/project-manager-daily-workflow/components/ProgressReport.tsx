@@ -71,19 +71,25 @@ const ProgressReport = ({
       const result = await getSignedUrl({
         files: values.photos.map((file) => ({
           filename: file.name,
-          contentType: file.type,
+          contentType: file.type || "application/octet-stream",
           folderName: "blockage-photos",
         })),
       });
 
       await Promise.all(
-        values.photos.map((file, i) =>
-          fetch(result[i]!.uploadUrl, {
+        values.photos.map(async (file, i) => {
+          const res = await fetch(result[i]!.uploadUrl, {
             method: "PUT",
             body: file,
-            headers: { "Content-Type": file.type },
-          }),
-        ),
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+          });
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Upload failed: ${res.status} ${res.statusText} - ${text}`);
+          }
+        }),
       );
 
       const s3Keys = result.map((r) => r.s3Key);

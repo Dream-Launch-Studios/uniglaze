@@ -27,7 +27,7 @@ export const AWSs3Router = createTRPCRouter({
           const putCommand = new PutObjectCommand({
             Bucket: env.AWS_S3_BUCKET,
             Key: s3Key,
-            ContentType: file.contentType,
+            ContentType: file.contentType || "application/octet-stream",
           });
           const uploadUrl = await getSignedUrl(s3, putCommand, {
             expiresIn: 600,
