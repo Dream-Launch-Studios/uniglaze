@@ -58,6 +58,9 @@ const ProgressReport = ({
     },
   });
 
+  const { mutateAsync: getSignedDownloadUrls } =
+    api.AWSs3.getSignedDownloadUrls.useMutation();
+
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleAddProgressReport(values: z.infer<typeof formSchema>) {
@@ -83,7 +86,9 @@ const ProgressReport = ({
         ),
       );
 
-      // TODO: Change this to the actual current sheet 1 item index
+      const s3Keys = result.map((r) => r.s3Key);
+      const { urls } = await getSignedDownloadUrls({ s3Keys });
+
       pushToProgressPhotos(itemIndex, {
         // @ts-ignore
         description: values.description,
@@ -91,7 +96,7 @@ const ProgressReport = ({
           s3Key: file.s3Key,
           fileName: values.photos[index]?.name ?? "",
           fileType: values.photos[index]?.type ?? "",
-          url: "",
+          url: urls[index] ?? "",
         })),
       });
 

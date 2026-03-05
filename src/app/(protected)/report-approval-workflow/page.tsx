@@ -430,16 +430,30 @@ const ReportApprovalWorkflowContent: React.FC = () => {
           );
         }
         setReports(filteredReports);
-        
+
         if (projectId) {
-          const project = filteredReports.find((r) => r.id === parseInt(projectId));
-          if (project) setSelectedReport(project);
+          const project = filteredReports.find(
+            (r) => r.id === parseInt(projectId),
+          );
+          if (project) {
+            setSelectedReport(project);
+            const fullProject = projects.data.find(
+              (p) => p.latestProjectVersion?.projectId === project.id,
+            );
+            if (fullProject) setProject(fullProject);
+          }
         } else {
-          // Auto-select first pending report
           const firstPending = filteredReports.find(
             (r) => r.yesterdayReportStatus === ReportStatus.PENDING,
           );
-          if (firstPending) setSelectedReport(firstPending);
+          if (firstPending) {
+            setSelectedReport(firstPending);
+            const fullProject = projects.data.find(
+              (p) =>
+                p.latestProjectVersion?.projectId === firstPending.id,
+            );
+            if (fullProject) setProject(fullProject);
+          }
         }
       } catch (error) {
         console.error("Failed to load reports:", error);

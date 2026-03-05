@@ -5,7 +5,6 @@ import {
   projectVersionSchema,
 } from "@/validators/prisma-schmea.validator";
 import { Role } from "@prisma/client";
-import { url } from "inspector";
 import z from "zod";
 
 export const projectRouter = createTRPCRouter({
@@ -317,9 +316,59 @@ export const projectRouter = createTRPCRouter({
             },
           }));
 
+        const withResolvedUrls = await Promise.all(
+          projectsWithLatestVersion.map(async (proj) => {
+            const latest = proj.latestProjectVersion as unknown as z.infer<
+              typeof projectVersionSchema
+            >;
+            if (!latest?.sheet1) return proj;
+            latest.sheet1 = await Promise.all(
+              latest.sheet1.map(async (item) => {
+                if (item?.yesterdayProgressPhotos?.length) {
+                  item.yesterdayProgressPhotos = await Promise.all(
+                    (item.yesterdayProgressPhotos ?? []).map(
+                      async (report) => {
+                        const s3Keys = report.photos.map(
+                          (photo) => photo.s3Key,
+                        );
+                        const urls = await getS3FileUrls(s3Keys, 60000);
+                        report.photos = report.photos.map(
+                          (photo, index) => ({
+                            ...photo,
+                            url: urls[index] ?? "",
+                          }),
+                        );
+                        return report;
+                      },
+                    ),
+                  );
+                }
+                if (item.blockages?.length) {
+                  item.blockages = await Promise.all(
+                    item.blockages.map(async (blockage) => {
+                      const s3Keys = blockage.blockagePhotos.map(
+                        (photo) => photo.s3Key,
+                      );
+                      const urls = await getS3FileUrls(s3Keys, 60000);
+                      blockage.blockagePhotos =
+                        blockage.blockagePhotos.map((photo, index) => ({
+                          ...photo,
+                          url: urls[index] ?? "",
+                        }));
+                      return blockage;
+                    }),
+                  );
+                }
+                return item;
+              }),
+            );
+            return { ...proj, latestProjectVersion: latest };
+          }),
+        );
+
         return {
           success: true,
-          data: projectsWithLatestVersion,
+          data: withResolvedUrls,
           message: "Projects assigned to project manager fetched successfully",
         };
       } catch (error) {

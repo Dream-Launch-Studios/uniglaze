@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/env";
-import s3 from "@/config/aws-s3.config";
+import s3, { getS3FileUrls } from "@/config/aws-s3.config";
 import { randomUUID } from "crypto";
 
 export const AWSs3Router = createTRPCRouter({
@@ -36,6 +36,15 @@ export const AWSs3Router = createTRPCRouter({
         }),
       );
       return results;
+    }),
+
+  /** Returns signed download URLs for given S3 keys (e.g. for displaying uploaded progress photos in the same session). */
+  getSignedDownloadUrls: protectedProcedure
+    .input(z.object({ s3Keys: z.array(z.string()) }))
+    .mutation(async ({ input }) => {
+      if (input.s3Keys.length === 0) return { urls: [] };
+      const urls = await getS3FileUrls(input.s3Keys, 60 * 60); // 1 hour
+      return { urls };
     }),
 });
 
