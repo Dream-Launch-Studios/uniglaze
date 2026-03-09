@@ -17,6 +17,7 @@ const config = {
       "images.unsplash.com",
       "s3.ap-south-1.amazonaws.com",
       "uniglaze-dev-testing.s3.ap-south-1.amazonaws.com",
+      "uniglaze-dev-testing-dl-shash.s3.ap-south-1.amazonaws.com",
       "firebasestorage.googleapis.com",
     ],
   },
